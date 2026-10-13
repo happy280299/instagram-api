@@ -1,0 +1,174 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  username   String   @unique
+  password   String
+  name       String
+  avatarUrl  String   @default("")
+  bio        String   @default("")
+  isVerified Boolean  @default(false)
+  role       Role     @default(USER)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  posts      Post[]
+  likes      Like[]
+  comments   Comment[]
+  savedPosts SavedPost[]
+  followers  Follow[]    @relation("following")
+  following  Follow[]    @relation("follower")
+  stories    Story[]
+  storyViews StoryView[]
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  slug     String    @unique
+  products Product[]
+}
+
+model Product {
+  id            Int       @id @default(autoincrement())
+  name          String
+  slug          String    @unique
+  description   String    @default("")
+  price         Int
+  originalPrice Int?
+  stock         Int       @default(0)
+  sold          Int       @default(0)
+  imageUrl      String    @default("")
+  categoryId    Int
+  category      Category  @relation(fields: [categoryId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  @@index([categoryId])
+  @@index([deletedAt])
+}
+
+model Post {
+  id        Int       @id @default(autoincrement())
+  authorId  Int
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  caption   String    @default("")
+  location  String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  media    PostMedia[]
+  likes    Like[]
+  comments Comment[]
+  savedBy  SavedPost[]
+
+  @@index([authorId, createdAt])
+  @@index([createdAt])
+}
+
+model PostMedia {
+  id     Int       @id @default(autoincrement())
+  postId Int
+  post   Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  url    String
+  type   MediaType @default(IMAGE)
+  width  Int?
+  height Int?
+  order  Int       @default(0)
+
+  @@index([postId, order])
+}
+
+model Like {
+  userId    Int
+  postId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, postId])
+  @@index([postId, createdAt])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  authorId  Int
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([postId, createdAt])
+}
+
+model SavedPost {
+  userId    Int
+  postId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, postId])
+}
+
+model Follow {
+  followerId  Int
+  followingId Int
+  follower    User     @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@id([followerId, followingId])
+  @@index([followingId])
+}
+
+// Story tự hết hạn sau 24h (expiresAt), không cần cron xoá
+model Story {
+  id        Int       @id @default(autoincrement())
+  authorId  Int
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  mediaUrl  String
+  type      MediaType @default(IMAGE)
+  // thời lượng hiển thị (ms), video thì lấy theo độ dài video
+  duration  Int       @default(5000)
+  createdAt DateTime  @default(now())
+  expiresAt DateTime
+
+  views StoryView[]
+
+  @@index([authorId, expiresAt])
+  @@index([expiresAt])
+}
+
+model StoryView {
+  storyId   Int
+  viewerId  Int
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  viewer    User     @relation(fields: [viewerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([storyId, viewerId])
+  @@index([viewerId])
+}
