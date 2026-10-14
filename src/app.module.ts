@@ -7,6 +7,9 @@ import { CategoriesModule } from './categories/categories.module';
 import { FeedModule } from './feed/feed.module';
 import { CommentsModule } from './comments/comments.module';
 import { StoriesModule } from './stories/stories.module';
+import { UploadsModule } from './uploads/uploads.module';
+import { PostsModule } from './posts/posts.module';
+import { UsersModule } from './users/users.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
@@ -22,6 +25,9 @@ import { join } from 'path';
     FeedModule,
     CommentsModule,
     StoriesModule,
+    UploadsModule,
+    PostsModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
