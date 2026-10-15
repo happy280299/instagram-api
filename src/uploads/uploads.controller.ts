@@ -21,19 +21,19 @@ import { MAX_UPLOAD_BYTES, UploadsService } from './uploads.service';
 @Injectable()
 class FileTooLargeMessage implements NestInterceptor {
   intercept(_ctx: ExecutionContext, next: CallHandler) {
-    return next
-      .handle()
-      .pipe(
-        catchError((err) =>
-          throwError(() =>
-            err instanceof PayloadTooLargeException
-              ? new PayloadTooLargeException(
-                  'This file is too large (max 10 MB)',
-                )
-              : err,
-          ),
+    return next.handle().pipe(
+      catchError((err) =>
+        throwError(() =>
+          // chỉ lỗi của Multer ('File too large'), giữ nguyên lỗi riêng của UploadsService
+          err instanceof PayloadTooLargeException &&
+          err.message === 'File too large'
+            ? new PayloadTooLargeException(
+                'This file is too large (max 50 MB for videos, 10 MB for photos)',
+              )
+            : err,
         ),
-      );
+      ),
+    );
   }
 }
 
@@ -52,6 +52,6 @@ export class UploadsController {
   )
   @ResponseMessage('Uploaded')
   upload(@UploadedFile() file?: Express.Multer.File) {
-    return this.uploads.saveImage(file);
+    return this.uploads.save(file);
   }
 }

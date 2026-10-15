@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   UnauthorizedException,
@@ -6,17 +7,19 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
+import { UploadsService } from '../uploads/uploads.service';
 import { User } from '../generated/prisma/client';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { toPublicUrl } from '../common/public-url';
+import { toAvatarUrl, toPublicUrl } from '../common/public-url';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
+    private uploads: UploadsService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -86,7 +89,7 @@ export class AuthService {
         name: dto.name,
         username: dto.username,
         bio: dto.bio,
-        avatarUrl: dto.avatarUrl,
+        avatarUrl: await this.resolveAvatar(userId, dto.avatarUrl),
       },
     });
     return this.toProfile(user);
@@ -110,6 +113,28 @@ export class AuthService {
     };
   }
 
+  // Avatar mới phải là ảnh do POST /uploads tạo (giống ảnh post), không nhận link ngoài.
+  // undefined = không đổi, '' = xoá avatar
+  private async resolveAvatar(userId: number, avatarUrl?: string) {
+    if (!avatarUrl) return avatarUrl;
+    const { avatarUrl: current } = await this.prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: { avatarUrl: true },
+    });
+    // FE gửi lại avatar đang có (kể cả link ngoài cũ, hoặc URL thumbnail) -> giữ nguyên
+    if (
+      avatarUrl === toPublicUrl(current) ||
+      avatarUrl === toAvatarUrl(current)
+    ) {
+      return current;
+    }
+    const { path, type } = await this.uploads.resolve(avatarUrl);
+    if (type !== 'IMAGE') {
+      throw new BadRequestException('Profile photo must be an image');
+    }
+    return path;
+  }
+
   // 'nguyen.van-a@gmail.com' -> 'nguyen.vana', trùng thì thêm số: 'nguyen.vana1234'
   private async generateUsername(email: string) {
     const base =
@@ -126,7 +151,7 @@ export class AuthService {
 
   private toSafeUser(user: User) {
     const { password: _password, updatedAt: _updatedAt, ...safeUser } = user;
-    return { ...safeUser, avatarUrl: toPublicUrl(safeUser.avatarUrl) };
+    return { ...safeUser, avatarUrl: toAvatarUrl(safeUser.avatarUrl) };
   }
 
   private buildAuthResponse(user: User) {

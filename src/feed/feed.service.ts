@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '../generated/prisma/client';
-import { toPublicUrl } from '../common/public-url';
+import {
+  toAvatarUrl,
+  toPublicUrl,
+  toVideoThumbnailUrl,
+} from '../common/public-url';
 import { FeedQueryDto } from './dto/feed-query.dto';
 
 const authorSelect = {
@@ -157,7 +161,7 @@ export class FeedService {
     return new Map(
       likes.map((l) => [
         l.postId,
-        { ...l.user, avatarUrl: toPublicUrl(l.user.avatarUrl) },
+        { ...l.user, avatarUrl: toAvatarUrl(l.user.avatarUrl) },
       ]),
     );
   }
@@ -183,11 +187,16 @@ export function toFeedPost(
     createdAt: p.createdAt,
     author: {
       ...author,
-      avatarUrl: toPublicUrl(author.avatarUrl),
+      avatarUrl: toAvatarUrl(author.avatarUrl),
       isFollowing: !!followers?.length,
       isMe: author.id === viewerId,
     },
-    media: p.media.map((m) => ({ ...m, url: toPublicUrl(m.url) })),
+    media: p.media.map((m) => ({
+      ...m,
+      url: toPublicUrl(m.url),
+      // video: ảnh bìa để hiện trên grid / trước khi video tải xong
+      thumbnailUrl: m.type === 'VIDEO' ? toVideoThumbnailUrl(m.url) : null,
+    })),
     likeCount: p._count.likes,
     commentCount: p._count.comments,
     isLiked: !!p.likes?.length,

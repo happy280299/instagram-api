@@ -15,7 +15,7 @@ const trim = ({ value }: { value: unknown }) =>
   typeof value === 'string' ? value.trim() : value;
 
 export class CreatePostMediaDto {
-  // URL do POST /api/uploads trả về
+  // URL do POST /api/uploads trả về (ảnh hoặc video)
   @IsString()
   url!: string;
 
@@ -44,9 +44,9 @@ export class CreatePostDto {
   @MaxLength(100, { message: 'Location can be up to 100 characters' })
   location?: string | null;
 
-  @IsArray({ message: 'Add between 1 and 10 photos' })
-  @ArrayMinSize(1, { message: 'Add between 1 and 10 photos' })
-  @ArrayMaxSize(10, { message: 'Add between 1 and 10 photos' })
+  @IsArray({ message: 'Add between 1 and 10 photos or videos' })
+  @ArrayMinSize(1, { message: 'Add between 1 and 10 photos or videos' })
+  @ArrayMaxSize(10, { message: 'Add between 1 and 10 photos or videos' })
   @ValidateNested({ each: true })
   @Type(() => CreatePostMediaDto)
   media!: CreatePostMediaDto[];

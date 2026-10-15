@@ -141,7 +141,9 @@ model Follow {
   createdAt   DateTime @default(now())
 
   @@id([followerId, followingId])
-  @@index([followingId])
+  // Danh sách followers / following, mới follow gần đây nhất trước
+  @@index([followingId, createdAt])
+  @@index([followerId, createdAt])
 }
 
 // Story tự hết hạn sau 24h (expiresAt), không cần cron xoá

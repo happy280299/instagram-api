@@ -26,6 +26,7 @@ export class PostsService {
         media: {
           create: media.map((m, order) => ({
             url: m.path,
+            type: m.type,
             width: m.width,
             height: m.height,
             order,
@@ -70,5 +71,35 @@ export class PostsService {
         hasMore,
       },
     };
+  }
+
+  // Like / bỏ like đều idempotent: bấm nhiều lần (double tap, retry) không lỗi, không tạo trùng
+  async like(postId: number, userId: number) {
+    await this.ensurePost(postId);
+    await this.prisma.like.createMany({
+      data: { postId, userId },
+      skipDuplicates: true,
+    });
+    return this.likeState(postId, true);
+  }
+
+  async unlike(postId: number, userId: number) {
+    await this.ensurePost(postId);
+    await this.prisma.like.deleteMany({ where: { postId, userId } });
+    return this.likeState(postId, false);
+  }
+
+  // Trả likeCount mới để FE cập nhật lại số đã tăng/giảm trước (optimistic update)
+  private async likeState(postId: number, isLiked: boolean) {
+    const likeCount = await this.prisma.like.count({ where: { postId } });
+    return { postId, isLiked, likeCount };
+  }
+
+  private async ensurePost(postId: number) {
+    const post = await this.prisma.post.findFirst({
+      where: { id: postId, deletedAt: null },
+      select: { id: true },
+    });
+    if (!post) throw new NotFoundException('Post not found');
   }
 }

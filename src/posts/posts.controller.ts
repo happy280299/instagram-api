@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   Param,
   ParseIntPipe,
   Post,
@@ -33,5 +35,23 @@ export class PostsController {
     @CurrentUser() user: JwtPayload | undefined,
   ) {
     return this.posts.findOne(id, user?.sub);
+  }
+
+  @Post(':id/like')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
+  @ResponseMessage('Liked')
+  like(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: JwtPayload) {
+    return this.posts.like(id, user.sub);
+  }
+
+  @Delete(':id/like')
+  @UseGuards(JwtAuthGuard)
+  @ResponseMessage('Unliked')
+  unlike(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.posts.unlike(id, user.sub);
   }
 }

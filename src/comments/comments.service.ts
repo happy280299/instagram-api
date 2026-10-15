@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '../generated/prisma/client';
-import { toPublicUrl } from '../common/public-url';
+import { toAvatarUrl } from '../common/public-url';
 import { JwtPayload } from '../auth/jwt-payload';
 import { CommentQueryDto } from './dto/comment-query.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -90,7 +90,7 @@ export class CommentsService {
 function toComment(c: CommentRow, viewerId?: number) {
   return {
     ...c,
-    author: { ...c.author, avatarUrl: toPublicUrl(c.author.avatarUrl) },
+    author: { ...c.author, avatarUrl: toAvatarUrl(c.author.avatarUrl) },
     isMine: c.author.id === viewerId,
   };
 }
