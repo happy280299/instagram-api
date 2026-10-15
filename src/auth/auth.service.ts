@@ -13,6 +13,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { toAvatarUrl, toPublicUrl } from '../common/public-url';
+import { toSearchText } from '../common/search-text';
 
 @Injectable()
 export class AuthService {
@@ -45,7 +46,13 @@ export class AuthService {
 
     // 4. Lưu vào DB
     const user = await this.prisma.user.create({
-      data: { name: dto.name, email: dto.email, username, password },
+      data: {
+        name: dto.name,
+        nameSearch: toSearchText(dto.name),
+        email: dto.email,
+        username,
+        password,
+      },
     });
 
     // 5. Trả về token + user (không kèm password)
@@ -87,6 +94,8 @@ export class AuthService {
       where: { id: userId },
       data: {
         name: dto.name,
+        // giữ nameSearch luôn khớp name (undefined = không đổi tên)
+        nameSearch: dto.name === undefined ? undefined : toSearchText(dto.name),
         username: dto.username,
         bio: dto.bio,
         avatarUrl: await this.resolveAvatar(userId, dto.avatarUrl),

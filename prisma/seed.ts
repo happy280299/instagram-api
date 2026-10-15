@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client';
 import { slugify } from '../src/common/slugify';
+import { toSearchText } from '../src/common/search-text';
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }),
@@ -109,9 +110,14 @@ async function main() {
   for (const a of accounts) {
     await prisma.user.upsert({
       where: { email: a.email },
-      update: { username: a.username, avatarUrl: avatar(a.username) },
+      update: {
+        username: a.username,
+        nameSearch: toSearchText(a.name),
+        avatarUrl: avatar(a.username),
+      },
       create: {
         ...a,
+        nameSearch: toSearchText(a.name),
         avatarUrl: avatar(a.username),
         password: await bcrypt.hash(a.password, 10),
       },
@@ -192,6 +198,7 @@ async function seedFeed() {
         email: `${username}@shop.dev`,
         username,
         name,
+        nameSearch: toSearchText(name),
         bio,
         isVerified,
         password,

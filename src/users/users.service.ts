@@ -9,6 +9,8 @@ import { PostsService } from '../posts/posts.service';
 import { toAvatarUrl } from '../common/public-url';
 import { UserPostsQueryDto } from '../posts/dto/user-posts-query.dto';
 import { FollowListQueryDto } from './dto/follow-list-query.dto';
+import { SearchUsersQueryDto } from './dto/search-users-query.dto';
+import { toSearchText } from '../common/search-text';
 
 const listUserSelect = {
   id: true,
@@ -17,6 +19,19 @@ const listUserSelect = {
   avatarUrl: true,
   isVerified: true,
 } satisfies Prisma.UserSelect;
+
+// Số ứng viên tối đa lấy ra trước khi xếp hạng (đủ cho typeahead, tránh đếm follower cho cả bảng)
+const CANDIDATE_LIMIT = 200;
+
+type SearchRow = {
+  id: number;
+  username: string;
+  name: string;
+  avatarUrl: string;
+  isVerified: boolean;
+  isFollowing: boolean;
+  followerCount: number;
+};
 
 @Injectable()
 export class UsersService {
@@ -63,6 +78,51 @@ export class UsersService {
       isFollowing: !!followers?.length,
       isMe: user.id === viewerId,
     };
+  }
+
+  // Ô tìm kiếm (typeahead). Lấy ứng viên bằng index trigram, rồi xếp hạng giống Instagram:
+  // trùng username > username bắt đầu bằng q > người mình follow > tên có từ bắt đầu bằng q
+  // > độ giống (similarity) > nhiều follower hơn
+  async search(q: SearchUsersQueryDto, viewerId?: number) {
+    const term = toSearchText(q.q);
+    if (!term) return [];
+    // escape ký tự đặc biệt của LIKE để '%' / '_' trong từ khoá được hiểu là chữ thường
+    const like = term.replace(/[\\%_]/g, '\\$&');
+    const contains = `%${like}%`;
+    const prefix = `${like}%`;
+    const wordPrefix = `% ${like}%`;
+    const viewer = viewerId ?? 0;
+
+    const rows = await this.prisma.$queryRaw<SearchRow[]>`
+      WITH candidates AS (
+        -- B1: dùng GIN trigram index, giới hạn số ứng viên trước khi đếm follower
+        SELECT u.id,
+               u.username = ${term} AS exact,
+               u.username LIKE ${prefix} AS "usernamePrefix",
+               (u."nameSearch" LIKE ${prefix} OR u."nameSearch" LIKE ${wordPrefix}) AS "namePrefix",
+               GREATEST(similarity(u.username, ${term}), similarity(u."nameSearch", ${term})) AS score
+        FROM "User" u
+        WHERE u.username LIKE ${contains} OR u."nameSearch" LIKE ${contains}
+        ORDER BY exact DESC, "usernamePrefix" DESC, "namePrefix" DESC, score DESC
+        LIMIT ${CANDIDATE_LIMIT}
+      )
+      -- B2: chỉ với ~200 ứng viên mới tính quan hệ follow + số follower để xếp hạng
+      SELECT u.id, u.username, u.name, u."avatarUrl", u."isVerified",
+             EXISTS (SELECT 1 FROM "Follow" f
+                     WHERE f."followerId" = ${viewer} AND f."followingId" = u.id) AS "isFollowing",
+             (SELECT COUNT(*)::int FROM "Follow" f WHERE f."followingId" = u.id) AS "followerCount"
+      FROM candidates c
+      JOIN "User" u ON u.id = c.id
+      ORDER BY c.exact DESC, c."usernamePrefix" DESC, "isFollowing" DESC,
+               c."namePrefix" DESC, c.score DESC, "followerCount" DESC, u.id
+      LIMIT ${q.limit}
+    `;
+
+    return rows.map((u) => ({
+      ...u,
+      avatarUrl: toAvatarUrl(u.avatarUrl),
+      isMe: u.id === viewerId,
+    }));
   }
 
   async findPosts(username: string, q: UserPostsQueryDto, viewerId?: number) {

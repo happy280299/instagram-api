@@ -16,11 +16,22 @@ import { JwtPayload } from '../auth/jwt-payload';
 import { ResponseMessage } from '../common/response-message.decorator';
 import { UserPostsQueryDto } from '../posts/dto/user-posts-query.dto';
 import { FollowListQueryDto } from './dto/follow-list-query.dto';
+import { SearchUsersQueryDto } from './dto/search-users-query.dto';
 
 // Profile công khai theo username (URL FE: /<username>), id số chỉ dùng nội bộ
 @Controller('users')
 export class UsersController {
   constructor(private users: UsersService) {}
+
+  // Phải khai báo trước ':username', không thì 'search' bị hiểu là username
+  @Get('search')
+  @UseGuards(OptionalJwtAuthGuard)
+  search(
+    @Query() query: SearchUsersQueryDto,
+    @CurrentUser() user: JwtPayload | undefined,
+  ) {
+    return this.users.search(query, user?.sub);
+  }
 
   @Get(':username')
   @UseGuards(OptionalJwtAuthGuard)

@@ -40,6 +40,7 @@ export type UserMinAggregateOutputType = {
   username: string | null
   password: string | null
   name: string | null
+  nameSearch: string | null
   avatarUrl: string | null
   bio: string | null
   isVerified: boolean | null
@@ -54,6 +55,7 @@ export type UserMaxAggregateOutputType = {
   username: string | null
   password: string | null
   name: string | null
+  nameSearch: string | null
   avatarUrl: string | null
   bio: string | null
   isVerified: boolean | null
@@ -68,6 +70,7 @@ export type UserCountAggregateOutputType = {
   username: number
   password: number
   name: number
+  nameSearch: number
   avatarUrl: number
   bio: number
   isVerified: number
@@ -92,6 +95,7 @@ export type UserMinAggregateInputType = {
   username?: true
   password?: true
   name?: true
+  nameSearch?: true
   avatarUrl?: true
   bio?: true
   isVerified?: true
@@ -106,6 +110,7 @@ export type UserMaxAggregateInputType = {
   username?: true
   password?: true
   name?: true
+  nameSearch?: true
   avatarUrl?: true
   bio?: true
   isVerified?: true
@@ -120,6 +125,7 @@ export type UserCountAggregateInputType = {
   username?: true
   password?: true
   name?: true
+  nameSearch?: true
   avatarUrl?: true
   bio?: true
   isVerified?: true
@@ -221,6 +227,7 @@ export type UserGroupByOutputType = {
   username: string
   password: string
   name: string
+  nameSearch: string
   avatarUrl: string
   bio: string
   isVerified: boolean
@@ -258,6 +265,7 @@ export type UserWhereInput = {
   username?: Prisma.StringFilter<"User"> | string
   password?: Prisma.StringFilter<"User"> | string
   name?: Prisma.StringFilter<"User"> | string
+  nameSearch?: Prisma.StringFilter<"User"> | string
   avatarUrl?: Prisma.StringFilter<"User"> | string
   bio?: Prisma.StringFilter<"User"> | string
   isVerified?: Prisma.BoolFilter<"User"> | boolean
@@ -280,6 +288,7 @@ export type UserOrderByWithRelationInput = {
   username?: Prisma.SortOrder
   password?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  nameSearch?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   bio?: Prisma.SortOrder
   isVerified?: Prisma.SortOrder
@@ -305,6 +314,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   password?: Prisma.StringFilter<"User"> | string
   name?: Prisma.StringFilter<"User"> | string
+  nameSearch?: Prisma.StringFilter<"User"> | string
   avatarUrl?: Prisma.StringFilter<"User"> | string
   bio?: Prisma.StringFilter<"User"> | string
   isVerified?: Prisma.BoolFilter<"User"> | boolean
@@ -327,6 +337,7 @@ export type UserOrderByWithAggregationInput = {
   username?: Prisma.SortOrder
   password?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  nameSearch?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   bio?: Prisma.SortOrder
   isVerified?: Prisma.SortOrder
@@ -349,6 +360,7 @@ export type UserScalarWhereWithAggregatesInput = {
   username?: Prisma.StringWithAggregatesFilter<"User"> | string
   password?: Prisma.StringWithAggregatesFilter<"User"> | string
   name?: Prisma.StringWithAggregatesFilter<"User"> | string
+  nameSearch?: Prisma.StringWithAggregatesFilter<"User"> | string
   avatarUrl?: Prisma.StringWithAggregatesFilter<"User"> | string
   bio?: Prisma.StringWithAggregatesFilter<"User"> | string
   isVerified?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
@@ -362,6 +374,7 @@ export type UserCreateInput = {
   username: string
   password: string
   name: string
+  nameSearch?: string
   avatarUrl?: string
   bio?: string
   isVerified?: boolean
@@ -384,6 +397,7 @@ export type UserUncheckedCreateInput = {
   username: string
   password: string
   name: string
+  nameSearch?: string
   avatarUrl?: string
   bio?: string
   isVerified?: boolean
@@ -405,6 +419,7 @@ export type UserUpdateInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameSearch?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.StringFieldUpdateOperationsInput | string
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -427,6 +442,7 @@ export type UserUncheckedUpdateInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameSearch?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.StringFieldUpdateOperationsInput | string
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -449,6 +465,7 @@ export type UserCreateManyInput = {
   username: string
   password: string
   name: string
+  nameSearch?: string
   avatarUrl?: string
   bio?: string
   isVerified?: boolean
@@ -462,6 +479,7 @@ export type UserUpdateManyMutationInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameSearch?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.StringFieldUpdateOperationsInput | string
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -476,6 +494,7 @@ export type UserUncheckedUpdateManyInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameSearch?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.StringFieldUpdateOperationsInput | string
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -490,6 +509,7 @@ export type UserCountOrderByAggregateInput = {
   username?: Prisma.SortOrder
   password?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  nameSearch?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   bio?: Prisma.SortOrder
   isVerified?: Prisma.SortOrder
@@ -508,6 +528,7 @@ export type UserMaxOrderByAggregateInput = {
   username?: Prisma.SortOrder
   password?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  nameSearch?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   bio?: Prisma.SortOrder
   isVerified?: Prisma.SortOrder
@@ -522,6 +543,7 @@ export type UserMinOrderByAggregateInput = {
   username?: Prisma.SortOrder
   password?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  nameSearch?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   bio?: Prisma.SortOrder
   isVerified?: Prisma.SortOrder
@@ -680,6 +702,7 @@ export type UserCreateWithoutPostsInput = {
   username: string
   password: string
   name: string
+  nameSearch?: string
   avatarUrl?: string
   bio?: string
   isVerified?: boolean
@@ -701,6 +724,7 @@ export type UserUncheckedCreateWithoutPostsInput = {
   username: string
   password: string
   name: string
+  nameSearch?: string
   avatarUrl?: string
   bio?: string
   isVerified?: boolean
@@ -737,6 +761,7 @@ export type UserUpdateWithoutPostsInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameSearch?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.StringFieldUpdateOperationsInput | string
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -758,6 +783,7 @@ export type UserUncheckedUpdateWithoutPostsInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameSearch?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.StringFieldUpdateOperationsInput | string
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -778,6 +804,7 @@ export type UserCreateWithoutLikesInput = {
   username: string
   password: string
   name: string
+  nameSearch?: string
   avatarUrl?: string
   bio?: string
   isVerified?: boolean
@@ -799,6 +826,7 @@ export type UserUncheckedCreateWithoutLikesInput = {
   username: string
   password: string
   name: string
+  nameSearch?: string
   avatarUrl?: string
   bio?: string
   isVerified?: boolean
@@ -835,6 +863,7 @@ export type UserUpdateWithoutLikesInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameSearch?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.StringFieldUpdateOperationsInput | string
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -856,6 +885,7 @@ export type UserUncheckedUpdateWithoutLikesInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameSearch?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.StringFieldUpdateOperationsInput | string
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -876,6 +906,7 @@ export type UserCreateWithoutCommentsInput = {
   username: string
   password: string
   name: string
+  nameSearch?: string
   avatarUrl?: string
   bio?: string
   isVerified?: boolean
@@ -897,6 +928,7 @@ export type UserUncheckedCreateWithoutCommentsInput = {
   username: string
   password: string
   name: string
+  nameSearch?: string
   avatarUrl?: string
   bio?: string
   isVerified?: boolean
@@ -933,6 +965,7 @@ export type UserUpdateWithoutCommentsInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameSearch?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.StringFieldUpdateOperationsInput | string
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -954,6 +987,7 @@ export type UserUncheckedUpdateWithoutCommentsInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameSearch?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.StringFieldUpdateOperationsInput | string
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -974,6 +1008,7 @@ export type UserCreateWithoutSavedPostsInput = {
   username: string
   password: string
   name: string
+  nameSearch?: string
   avatarUrl?: string
   bio?: string
   isVerified?: boolean
@@ -995,6 +1030,7 @@ export type UserUncheckedCreateWithoutSavedPostsInput = {
   username: string
   password: string
   name: string
+  nameSearch?: string
   avatarUrl?: string
   bio?: string
   isVerified?: boolean
@@ -1031,6 +1067,7 @@ export type UserUpdateWithoutSavedPostsInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameSearch?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.StringFieldUpdateOperationsInput | string
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1052,6 +1089,7 @@ export type UserUncheckedUpdateWithoutSavedPostsInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameSearch?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.StringFieldUpdateOperationsInput | string
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1072,6 +1110,7 @@ export type UserCreateWithoutFollowingInput = {
   username: string
   password: string
   name: string
+  nameSearch?: string
   avatarUrl?: string
   bio?: string
   isVerified?: boolean
@@ -1093,6 +1132,7 @@ export type UserUncheckedCreateWithoutFollowingInput = {
   username: string
   password: string
   name: string
+  nameSearch?: string
   avatarUrl?: string
   bio?: string
   isVerified?: boolean
@@ -1118,6 +1158,7 @@ export type UserCreateWithoutFollowersInput = {
   username: string
   password: string
   name: string
+  nameSearch?: string
   avatarUrl?: string
   bio?: string
   isVerified?: boolean
@@ -1139,6 +1180,7 @@ export type UserUncheckedCreateWithoutFollowersInput = {
   username: string
   password: string
   name: string
+  nameSearch?: string
   avatarUrl?: string
   bio?: string
   isVerified?: boolean
@@ -1175,6 +1217,7 @@ export type UserUpdateWithoutFollowingInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameSearch?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.StringFieldUpdateOperationsInput | string
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1196,6 +1239,7 @@ export type UserUncheckedUpdateWithoutFollowingInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameSearch?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.StringFieldUpdateOperationsInput | string
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1227,6 +1271,7 @@ export type UserUpdateWithoutFollowersInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameSearch?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.StringFieldUpdateOperationsInput | string
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1248,6 +1293,7 @@ export type UserUncheckedUpdateWithoutFollowersInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameSearch?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.StringFieldUpdateOperationsInput | string
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1268,6 +1314,7 @@ export type UserCreateWithoutStoriesInput = {
   username: string
   password: string
   name: string
+  nameSearch?: string
   avatarUrl?: string
   bio?: string
   isVerified?: boolean
@@ -1289,6 +1336,7 @@ export type UserUncheckedCreateWithoutStoriesInput = {
   username: string
   password: string
   name: string
+  nameSearch?: string
   avatarUrl?: string
   bio?: string
   isVerified?: boolean
@@ -1325,6 +1373,7 @@ export type UserUpdateWithoutStoriesInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameSearch?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.StringFieldUpdateOperationsInput | string
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1346,6 +1395,7 @@ export type UserUncheckedUpdateWithoutStoriesInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameSearch?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.StringFieldUpdateOperationsInput | string
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1366,6 +1416,7 @@ export type UserCreateWithoutStoryViewsInput = {
   username: string
   password: string
   name: string
+  nameSearch?: string
   avatarUrl?: string
   bio?: string
   isVerified?: boolean
@@ -1387,6 +1438,7 @@ export type UserUncheckedCreateWithoutStoryViewsInput = {
   username: string
   password: string
   name: string
+  nameSearch?: string
   avatarUrl?: string
   bio?: string
   isVerified?: boolean
@@ -1423,6 +1475,7 @@ export type UserUpdateWithoutStoryViewsInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameSearch?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.StringFieldUpdateOperationsInput | string
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1444,6 +1497,7 @@ export type UserUncheckedUpdateWithoutStoryViewsInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  nameSearch?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.StringFieldUpdateOperationsInput | string
   isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1559,6 +1613,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   username?: boolean
   password?: boolean
   name?: boolean
+  nameSearch?: boolean
   avatarUrl?: boolean
   bio?: boolean
   isVerified?: boolean
@@ -1582,6 +1637,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   username?: boolean
   password?: boolean
   name?: boolean
+  nameSearch?: boolean
   avatarUrl?: boolean
   bio?: boolean
   isVerified?: boolean
@@ -1596,6 +1652,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   username?: boolean
   password?: boolean
   name?: boolean
+  nameSearch?: boolean
   avatarUrl?: boolean
   bio?: boolean
   isVerified?: boolean
@@ -1610,6 +1667,7 @@ export type UserSelectScalar = {
   username?: boolean
   password?: boolean
   name?: boolean
+  nameSearch?: boolean
   avatarUrl?: boolean
   bio?: boolean
   isVerified?: boolean
@@ -1618,7 +1676,7 @@ export type UserSelectScalar = {
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "username" | "password" | "name" | "avatarUrl" | "bio" | "isVerified" | "role" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "username" | "password" | "name" | "nameSearch" | "avatarUrl" | "bio" | "isVerified" | "role" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   posts?: boolean | Prisma.User$postsArgs<ExtArgs>
   likes?: boolean | Prisma.User$likesArgs<ExtArgs>
@@ -1651,6 +1709,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     username: string
     password: string
     name: string
+    nameSearch: string
     avatarUrl: string
     bio: string
     isVerified: boolean
@@ -2093,6 +2152,7 @@ export interface UserFieldRefs {
   readonly username: Prisma.FieldRef<"User", 'String'>
   readonly password: Prisma.FieldRef<"User", 'String'>
   readonly name: Prisma.FieldRef<"User", 'String'>
+  readonly nameSearch: Prisma.FieldRef<"User", 'String'>
   readonly avatarUrl: Prisma.FieldRef<"User", 'String'>
   readonly bio: Prisma.FieldRef<"User", 'String'>
   readonly isVerified: Prisma.FieldRef<"User", 'Boolean'>

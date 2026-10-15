@@ -24,6 +24,8 @@ model User {
   username   String   @unique
   password   String
   name       String
+  // name đã chuẩn hoá cho tìm kiếm (toSearchText): 'Nguyễn Văn A' -> 'nguyen van a'
+  nameSearch String   @default("")
   avatarUrl  String   @default("")
   bio        String   @default("")
   isVerified Boolean  @default(false)
@@ -39,6 +41,10 @@ model User {
   following  Follow[]    @relation("follower")
   stories    Story[]
   storyViews StoryView[]
+
+  // Tìm user (GET /users/search): ILIKE '%...%' + similarity() dùng index trigram (pg_trgm)
+  @@index([username(ops: raw("gin_trgm_ops"))], type: Gin, map: "User_username_trgm_idx")
+  @@index([nameSearch(ops: raw("gin_trgm_ops"))], type: Gin, map: "User_nameSearch_trgm_idx")
 }
 
 model Category {
