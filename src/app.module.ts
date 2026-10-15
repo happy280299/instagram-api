@@ -11,10 +11,13 @@ import { UploadsModule } from './uploads/uploads.module';
 import { PostsModule } from './posts/posts.module';
 import { UsersModule } from './users/users.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { ScheduleModule } from '@nestjs/schedule';
 import { join } from 'path';
 
 @Module({
   imports: [
+    // cron job: dọn story hết hạn (StoriesService.purgeExpired)
+    ScheduleModule.forRoot(),
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'public'),
       serveRoot: '/static',

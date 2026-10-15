@@ -4,7 +4,7 @@ import {
   PayloadTooLargeException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { mkdir, readFile, writeFile } from 'fs/promises';
+import { mkdir, readFile, unlink, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { imageSize } from 'image-size';
 import {
@@ -143,6 +143,36 @@ export class UploadsService {
     // Lấy kích thước thật của file thay vì tin width/height FE gửi
     const { width, height } = readImage(buffer);
     return { path, type: 'IMAGE', width, height };
+  }
+
+  // Xoá file đã lưu (giá trị lưu trong DB: URL Cloudinary hoặc /static/uploads/...).
+  // File không còn tồn tại cũng coi như xoá xong; link ngoài (avatar cũ) thì bỏ qua
+  async remove(path: string) {
+    const cloud = CLOUDINARY_URL_RE.exec(path);
+    if (cloud) {
+      if (!useCloudinary) {
+        throw new Error('Cloudinary is not configured, cannot delete ' + path);
+      }
+      const [publicId, resourceType] = cloud[1]
+        ? [cloud[1], 'image']
+        : [cloud[2], 'video'];
+      const { result } = (await cloudinary.uploader.destroy(publicId, {
+        resource_type: resourceType,
+        invalidate: true,
+      })) as { result: string };
+      if (result !== 'ok' && result !== 'not found') {
+        throw new Error(`Cloudinary destroy ${publicId}: ${result}`);
+      }
+      return;
+    }
+
+    if (UPLOAD_PATH_RE.test(path)) {
+      await unlink(join(UPLOAD_DIR, path.slice(UPLOAD_PREFIX.length))).catch(
+        (err: NodeJS.ErrnoException) => {
+          if (err.code !== 'ENOENT') throw err;
+        },
+      );
+    }
   }
 
   // Video chỉ hỗ trợ khi có Cloudinary: cần chuyển định dạng + đọc độ dài (local không có ffmpeg)

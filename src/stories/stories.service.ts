@@ -2,8 +2,10 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '../generated/prisma/client';
 import {
@@ -34,6 +36,11 @@ const STORY_TTL_MS = 24 * 60 * 60 * 1000;
 
 // Story ảnh hiện 5s, story video chạy hết video (tối đa 60s)
 const IMAGE_STORY_MS = 5000;
+// Hết hạn + 12h thì xoá hẳn (file trên Cloudinary + dòng trong DB) để tiết kiệm dung lượng gói free.
+// 12h này để chủ story vẫn xem được ai đã xem sau khi story biến khỏi tray
+const PURGE_AFTER_EXPIRY_MS = 12 * 60 * 60 * 1000;
+// Mỗi lần job chạy xoá tối đa chừng này story (Cloudinary Admin API giới hạn ~500 lần/giờ)
+const PURGE_BATCH = 100;
 const MAX_STORY_VIDEO_SECONDS = 60;
 
 // Khách xem tray thì chỉ lấy tối đa chừng này user
@@ -41,6 +48,9 @@ const GUEST_TRAY_LIMIT = 30;
 
 @Injectable()
 export class StoriesService {
+  private readonly logger = new Logger(StoriesService.name);
+  private purging = false;
+
   constructor(
     private prisma: PrismaService,
     private uploads: UploadsService,
@@ -266,8 +276,74 @@ export class StoriesService {
       throw new ForbiddenException('You cannot delete this story');
     }
 
-    await this.prisma.story.delete({ where: { id: storyId } });
+    const { mediaUrl } = await this.prisma.story.delete({
+      where: { id: storyId },
+    });
+    // Xoá file không được làm hỏng request: lỗi thì ghi log, story vẫn coi như đã xoá
+    await this.deleteMediaIfUnused(mediaUrl).catch((err: Error) =>
+      this.logger.warn(
+        `Story ${storyId}: could not delete media: ${err.message}`,
+      ),
+    );
     return null;
+  }
+
+  // Chạy mỗi giờ: story hết hạn quá 12h -> xoá file rồi xoá dòng trong DB (lượt xem xoá theo).
+  // Xoá file lỗi thì giữ lại dòng trong DB để lần chạy sau thử lại
+  @Cron(CronExpression.EVERY_HOUR)
+  async purgeExpired() {
+    if (this.purging) return; // lần trước chưa xong thì bỏ qua
+    this.purging = true;
+    try {
+      const stories = await this.prisma.story.findMany({
+        where: {
+          expiresAt: { lt: new Date(Date.now() - PURGE_AFTER_EXPIRY_MS) },
+        },
+        orderBy: { expiresAt: 'asc' },
+        take: PURGE_BATCH,
+        select: { id: true, mediaUrl: true },
+      });
+
+      let purged = 0;
+      for (const story of stories) {
+        try {
+          // Xoá dòng trước khi kiểm tra "còn ai dùng file không", để 2 story chung file
+          // thì story cuối cùng sẽ xoá được file; lỗi xoá file -> rollback giữ lại dòng
+          await this.prisma.$transaction(
+            async (tx) => {
+              await tx.story.delete({ where: { id: story.id } });
+              await this.deleteMediaIfUnused(story.mediaUrl, tx);
+              // có gọi Cloudinary bên trong -> nới timeout mặc định 5s của Prisma
+            },
+            { timeout: 15_000 },
+          );
+          purged++;
+        } catch (err) {
+          this.logger.warn(
+            `Story ${story.id}: purge failed, will retry: ${(err as Error).message}`,
+          );
+        }
+      }
+      if (stories.length) {
+        this.logger.log(`Purged ${purged}/${stories.length} expired stories`);
+      }
+      return { found: stories.length, purged };
+    } finally {
+      this.purging = false;
+    }
+  }
+
+  // Cùng 1 URL upload có thể đã được dùng cho post / avatar / story khác -> còn dùng thì giữ file
+  private async deleteMediaIfUnused(
+    url: string,
+    db: Prisma.TransactionClient = this.prisma,
+  ) {
+    const [posts, avatars, stories] = await Promise.all([
+      db.postMedia.count({ where: { url } }),
+      db.user.count({ where: { avatarUrl: url } }),
+      db.story.count({ where: { mediaUrl: url } }),
+    ]);
+    if (posts + avatars + stories === 0) await this.uploads.remove(url);
   }
 
   private async trayAuthorIds(viewerId: number) {
