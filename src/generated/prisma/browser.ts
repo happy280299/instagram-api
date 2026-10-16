@@ -72,3 +72,28 @@ export type Story = Prisma.StoryModel
  * 
  */
 export type StoryView = Prisma.StoryViewModel
+/**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel
+/**
+ * Model Conversation
+ * 
+ */
+export type Conversation = Prisma.ConversationModel
+/**
+ * Model ConversationMember
+ * 
+ */
+export type ConversationMember = Prisma.ConversationMemberModel
+/**
+ * Model Message
+ * 
+ */
+export type Message = Prisma.MessageModel
+/**
+ * Model ReelView
+ * 
+ */
+export type ReelView = Prisma.ReelViewModel

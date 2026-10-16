@@ -52,6 +52,16 @@ export class UsersController {
     return this.users.findPosts(username, query, user?.sub);
   }
 
+  @Get(':username/reels')
+  @UseGuards(OptionalJwtAuthGuard)
+  findReels(
+    @Param('username') username: string,
+    @Query() query: UserPostsQueryDto,
+    @CurrentUser() user: JwtPayload | undefined,
+  ) {
+    return this.users.findReels(username, query, user?.sub);
+  }
+
   @Get(':username/followers')
   @UseGuards(OptionalJwtAuthGuard)
   findFollowers(

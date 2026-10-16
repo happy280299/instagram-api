@@ -23,3 +23,12 @@ export const MediaType = {
 } as const
 
 export type MediaType = (typeof MediaType)[keyof typeof MediaType]
+
+
+export const NotificationType = {
+  LIKE: 'LIKE',
+  COMMENT: 'COMMENT',
+  FOLLOW: 'FOLLOW'
+} as const
+
+export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]

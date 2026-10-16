@@ -45,9 +45,14 @@ export function postInclude(viewerId?: number) {
     },
     likes: mine && { ...mine, select: { userId: true } },
     savedBy: mine && { ...mine, select: { userId: true } },
-    _count: { select: { likes: true, comments: true } },
+    _count: { select: { likes: true, comments: true, reelViews: true } },
   } satisfies Prisma.PostInclude;
 }
+
+// Reel tắt "Cũng chia sẻ lên Feed" thì chỉ nằm ở tab Reels (không hiện ở feed / lưới bài chính)
+export const FEED_VISIBLE = {
+  NOT: { isReel: true, shareToFeed: false },
+} satisfies Prisma.PostWhereInput;
 
 type FeedPost = Prisma.PostGetPayload<{
   include: ReturnType<typeof postInclude>;
@@ -128,7 +133,7 @@ export class FeedService {
     viewerId?: number,
   ) {
     return this.prisma.post.findMany({
-      where: { deletedAt: null, ...where },
+      where: { deletedAt: null, ...where, ...FEED_VISIBLE },
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       take,
       ...(afterId ? { cursor: { id: afterId }, skip: 1 } : {}),
@@ -185,6 +190,10 @@ export function toFeedPost(
     caption: p.caption,
     location: p.location,
     createdAt: p.createdAt,
+    // bài đúng 1 video = Reel; viewCount chỉ có với reel
+    isReel: p.isReel,
+    shareToFeed: p.shareToFeed,
+    viewCount: p.isReel ? p._count.reelViews : null,
     author: {
       ...author,
       avatarUrl: toAvatarUrl(author.avatarUrl),

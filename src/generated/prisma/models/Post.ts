@@ -44,6 +44,8 @@ export type PostMinAggregateOutputType = {
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
+  isReel: boolean | null
+  shareToFeed: boolean | null
 }
 
 export type PostMaxAggregateOutputType = {
@@ -54,6 +56,8 @@ export type PostMaxAggregateOutputType = {
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
+  isReel: boolean | null
+  shareToFeed: boolean | null
 }
 
 export type PostCountAggregateOutputType = {
@@ -64,6 +68,8 @@ export type PostCountAggregateOutputType = {
   createdAt: number
   updatedAt: number
   deletedAt: number
+  isReel: number
+  shareToFeed: number
   _all: number
 }
 
@@ -86,6 +92,8 @@ export type PostMinAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
+  isReel?: true
+  shareToFeed?: true
 }
 
 export type PostMaxAggregateInputType = {
@@ -96,6 +104,8 @@ export type PostMaxAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
+  isReel?: true
+  shareToFeed?: true
 }
 
 export type PostCountAggregateInputType = {
@@ -106,6 +116,8 @@ export type PostCountAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
+  isReel?: true
+  shareToFeed?: true
   _all?: true
 }
 
@@ -203,6 +215,8 @@ export type PostGroupByOutputType = {
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
+  isReel: boolean
+  shareToFeed: boolean
   _count: PostCountAggregateOutputType | null
   _avg: PostAvgAggregateOutputType | null
   _sum: PostSumAggregateOutputType | null
@@ -236,11 +250,15 @@ export type PostWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
+  isReel?: Prisma.BoolFilter<"Post"> | boolean
+  shareToFeed?: Prisma.BoolFilter<"Post"> | boolean
   author?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   media?: Prisma.PostMediaListRelationFilter
   likes?: Prisma.LikeListRelationFilter
   comments?: Prisma.CommentListRelationFilter
   savedBy?: Prisma.SavedPostListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
+  reelViews?: Prisma.ReelViewListRelationFilter
 }
 
 export type PostOrderByWithRelationInput = {
@@ -251,11 +269,15 @@ export type PostOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  isReel?: Prisma.SortOrder
+  shareToFeed?: Prisma.SortOrder
   author?: Prisma.UserOrderByWithRelationInput
   media?: Prisma.PostMediaOrderByRelationAggregateInput
   likes?: Prisma.LikeOrderByRelationAggregateInput
   comments?: Prisma.CommentOrderByRelationAggregateInput
   savedBy?: Prisma.SavedPostOrderByRelationAggregateInput
+  notifications?: Prisma.NotificationOrderByRelationAggregateInput
+  reelViews?: Prisma.ReelViewOrderByRelationAggregateInput
 }
 
 export type PostWhereUniqueInput = Prisma.AtLeast<{
@@ -269,11 +291,15 @@ export type PostWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
+  isReel?: Prisma.BoolFilter<"Post"> | boolean
+  shareToFeed?: Prisma.BoolFilter<"Post"> | boolean
   author?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   media?: Prisma.PostMediaListRelationFilter
   likes?: Prisma.LikeListRelationFilter
   comments?: Prisma.CommentListRelationFilter
   savedBy?: Prisma.SavedPostListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
+  reelViews?: Prisma.ReelViewListRelationFilter
 }, "id">
 
 export type PostOrderByWithAggregationInput = {
@@ -284,6 +310,8 @@ export type PostOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  isReel?: Prisma.SortOrder
+  shareToFeed?: Prisma.SortOrder
   _count?: Prisma.PostCountOrderByAggregateInput
   _avg?: Prisma.PostAvgOrderByAggregateInput
   _max?: Prisma.PostMaxOrderByAggregateInput
@@ -302,6 +330,8 @@ export type PostScalarWhereWithAggregatesInput = {
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Post"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Post"> | Date | string
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Post"> | Date | string | null
+  isReel?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
+  shareToFeed?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
 }
 
 export type PostCreateInput = {
@@ -310,11 +340,15 @@ export type PostCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  isReel?: boolean
+  shareToFeed?: boolean
   author: Prisma.UserCreateNestedOneWithoutPostsInput
   media?: Prisma.PostMediaCreateNestedManyWithoutPostInput
   likes?: Prisma.LikeCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentCreateNestedManyWithoutPostInput
   savedBy?: Prisma.SavedPostCreateNestedManyWithoutPostInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutPostInput
+  reelViews?: Prisma.ReelViewCreateNestedManyWithoutPostInput
 }
 
 export type PostUncheckedCreateInput = {
@@ -325,10 +359,14 @@ export type PostUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  isReel?: boolean
+  shareToFeed?: boolean
   media?: Prisma.PostMediaUncheckedCreateNestedManyWithoutPostInput
   likes?: Prisma.LikeUncheckedCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   savedBy?: Prisma.SavedPostUncheckedCreateNestedManyWithoutPostInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutPostInput
+  reelViews?: Prisma.ReelViewUncheckedCreateNestedManyWithoutPostInput
 }
 
 export type PostUpdateInput = {
@@ -337,11 +375,15 @@ export type PostUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isReel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareToFeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   author?: Prisma.UserUpdateOneRequiredWithoutPostsNestedInput
   media?: Prisma.PostMediaUpdateManyWithoutPostNestedInput
   likes?: Prisma.LikeUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   savedBy?: Prisma.SavedPostUpdateManyWithoutPostNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutPostNestedInput
+  reelViews?: Prisma.ReelViewUpdateManyWithoutPostNestedInput
 }
 
 export type PostUncheckedUpdateInput = {
@@ -352,10 +394,14 @@ export type PostUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isReel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareToFeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   media?: Prisma.PostMediaUncheckedUpdateManyWithoutPostNestedInput
   likes?: Prisma.LikeUncheckedUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   savedBy?: Prisma.SavedPostUncheckedUpdateManyWithoutPostNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutPostNestedInput
+  reelViews?: Prisma.ReelViewUncheckedUpdateManyWithoutPostNestedInput
 }
 
 export type PostCreateManyInput = {
@@ -366,6 +412,8 @@ export type PostCreateManyInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  isReel?: boolean
+  shareToFeed?: boolean
 }
 
 export type PostUpdateManyMutationInput = {
@@ -374,6 +422,8 @@ export type PostUpdateManyMutationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isReel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareToFeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type PostUncheckedUpdateManyInput = {
@@ -384,6 +434,8 @@ export type PostUncheckedUpdateManyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isReel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareToFeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type PostListRelationFilter = {
@@ -404,6 +456,8 @@ export type PostCountOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
+  isReel?: Prisma.SortOrder
+  shareToFeed?: Prisma.SortOrder
 }
 
 export type PostAvgOrderByAggregateInput = {
@@ -419,6 +473,8 @@ export type PostMaxOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
+  isReel?: Prisma.SortOrder
+  shareToFeed?: Prisma.SortOrder
 }
 
 export type PostMinOrderByAggregateInput = {
@@ -429,6 +485,8 @@ export type PostMinOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
+  isReel?: Prisma.SortOrder
+  shareToFeed?: Prisma.SortOrder
 }
 
 export type PostSumOrderByAggregateInput = {
@@ -439,6 +497,11 @@ export type PostSumOrderByAggregateInput = {
 export type PostScalarRelationFilter = {
   is?: Prisma.PostWhereInput
   isNot?: Prisma.PostWhereInput
+}
+
+export type PostNullableScalarRelationFilter = {
+  is?: Prisma.PostWhereInput | null
+  isNot?: Prisma.PostWhereInput | null
 }
 
 export type PostCreateNestedManyWithoutAuthorInput = {
@@ -543,16 +606,50 @@ export type PostUpdateOneRequiredWithoutSavedByNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.PostUpdateToOneWithWhereWithoutSavedByInput, Prisma.PostUpdateWithoutSavedByInput>, Prisma.PostUncheckedUpdateWithoutSavedByInput>
 }
 
+export type PostCreateNestedOneWithoutNotificationsInput = {
+  create?: Prisma.XOR<Prisma.PostCreateWithoutNotificationsInput, Prisma.PostUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.PostCreateOrConnectWithoutNotificationsInput
+  connect?: Prisma.PostWhereUniqueInput
+}
+
+export type PostUpdateOneWithoutNotificationsNestedInput = {
+  create?: Prisma.XOR<Prisma.PostCreateWithoutNotificationsInput, Prisma.PostUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.PostCreateOrConnectWithoutNotificationsInput
+  upsert?: Prisma.PostUpsertWithoutNotificationsInput
+  disconnect?: Prisma.PostWhereInput | boolean
+  delete?: Prisma.PostWhereInput | boolean
+  connect?: Prisma.PostWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PostUpdateToOneWithWhereWithoutNotificationsInput, Prisma.PostUpdateWithoutNotificationsInput>, Prisma.PostUncheckedUpdateWithoutNotificationsInput>
+}
+
+export type PostCreateNestedOneWithoutReelViewsInput = {
+  create?: Prisma.XOR<Prisma.PostCreateWithoutReelViewsInput, Prisma.PostUncheckedCreateWithoutReelViewsInput>
+  connectOrCreate?: Prisma.PostCreateOrConnectWithoutReelViewsInput
+  connect?: Prisma.PostWhereUniqueInput
+}
+
+export type PostUpdateOneRequiredWithoutReelViewsNestedInput = {
+  create?: Prisma.XOR<Prisma.PostCreateWithoutReelViewsInput, Prisma.PostUncheckedCreateWithoutReelViewsInput>
+  connectOrCreate?: Prisma.PostCreateOrConnectWithoutReelViewsInput
+  upsert?: Prisma.PostUpsertWithoutReelViewsInput
+  connect?: Prisma.PostWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PostUpdateToOneWithWhereWithoutReelViewsInput, Prisma.PostUpdateWithoutReelViewsInput>, Prisma.PostUncheckedUpdateWithoutReelViewsInput>
+}
+
 export type PostCreateWithoutAuthorInput = {
   caption?: string
   location?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  isReel?: boolean
+  shareToFeed?: boolean
   media?: Prisma.PostMediaCreateNestedManyWithoutPostInput
   likes?: Prisma.LikeCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentCreateNestedManyWithoutPostInput
   savedBy?: Prisma.SavedPostCreateNestedManyWithoutPostInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutPostInput
+  reelViews?: Prisma.ReelViewCreateNestedManyWithoutPostInput
 }
 
 export type PostUncheckedCreateWithoutAuthorInput = {
@@ -562,10 +659,14 @@ export type PostUncheckedCreateWithoutAuthorInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  isReel?: boolean
+  shareToFeed?: boolean
   media?: Prisma.PostMediaUncheckedCreateNestedManyWithoutPostInput
   likes?: Prisma.LikeUncheckedCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   savedBy?: Prisma.SavedPostUncheckedCreateNestedManyWithoutPostInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutPostInput
+  reelViews?: Prisma.ReelViewUncheckedCreateNestedManyWithoutPostInput
 }
 
 export type PostCreateOrConnectWithoutAuthorInput = {
@@ -605,6 +706,8 @@ export type PostScalarWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
+  isReel?: Prisma.BoolFilter<"Post"> | boolean
+  shareToFeed?: Prisma.BoolFilter<"Post"> | boolean
 }
 
 export type PostCreateWithoutMediaInput = {
@@ -613,10 +716,14 @@ export type PostCreateWithoutMediaInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  isReel?: boolean
+  shareToFeed?: boolean
   author: Prisma.UserCreateNestedOneWithoutPostsInput
   likes?: Prisma.LikeCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentCreateNestedManyWithoutPostInput
   savedBy?: Prisma.SavedPostCreateNestedManyWithoutPostInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutPostInput
+  reelViews?: Prisma.ReelViewCreateNestedManyWithoutPostInput
 }
 
 export type PostUncheckedCreateWithoutMediaInput = {
@@ -627,9 +734,13 @@ export type PostUncheckedCreateWithoutMediaInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  isReel?: boolean
+  shareToFeed?: boolean
   likes?: Prisma.LikeUncheckedCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   savedBy?: Prisma.SavedPostUncheckedCreateNestedManyWithoutPostInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutPostInput
+  reelViews?: Prisma.ReelViewUncheckedCreateNestedManyWithoutPostInput
 }
 
 export type PostCreateOrConnectWithoutMediaInput = {
@@ -654,10 +765,14 @@ export type PostUpdateWithoutMediaInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isReel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareToFeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   author?: Prisma.UserUpdateOneRequiredWithoutPostsNestedInput
   likes?: Prisma.LikeUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   savedBy?: Prisma.SavedPostUpdateManyWithoutPostNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutPostNestedInput
+  reelViews?: Prisma.ReelViewUpdateManyWithoutPostNestedInput
 }
 
 export type PostUncheckedUpdateWithoutMediaInput = {
@@ -668,9 +783,13 @@ export type PostUncheckedUpdateWithoutMediaInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isReel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareToFeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   likes?: Prisma.LikeUncheckedUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   savedBy?: Prisma.SavedPostUncheckedUpdateManyWithoutPostNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutPostNestedInput
+  reelViews?: Prisma.ReelViewUncheckedUpdateManyWithoutPostNestedInput
 }
 
 export type PostCreateWithoutLikesInput = {
@@ -679,10 +798,14 @@ export type PostCreateWithoutLikesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  isReel?: boolean
+  shareToFeed?: boolean
   author: Prisma.UserCreateNestedOneWithoutPostsInput
   media?: Prisma.PostMediaCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentCreateNestedManyWithoutPostInput
   savedBy?: Prisma.SavedPostCreateNestedManyWithoutPostInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutPostInput
+  reelViews?: Prisma.ReelViewCreateNestedManyWithoutPostInput
 }
 
 export type PostUncheckedCreateWithoutLikesInput = {
@@ -693,9 +816,13 @@ export type PostUncheckedCreateWithoutLikesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  isReel?: boolean
+  shareToFeed?: boolean
   media?: Prisma.PostMediaUncheckedCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   savedBy?: Prisma.SavedPostUncheckedCreateNestedManyWithoutPostInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutPostInput
+  reelViews?: Prisma.ReelViewUncheckedCreateNestedManyWithoutPostInput
 }
 
 export type PostCreateOrConnectWithoutLikesInput = {
@@ -720,10 +847,14 @@ export type PostUpdateWithoutLikesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isReel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareToFeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   author?: Prisma.UserUpdateOneRequiredWithoutPostsNestedInput
   media?: Prisma.PostMediaUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   savedBy?: Prisma.SavedPostUpdateManyWithoutPostNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutPostNestedInput
+  reelViews?: Prisma.ReelViewUpdateManyWithoutPostNestedInput
 }
 
 export type PostUncheckedUpdateWithoutLikesInput = {
@@ -734,9 +865,13 @@ export type PostUncheckedUpdateWithoutLikesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isReel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareToFeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   media?: Prisma.PostMediaUncheckedUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   savedBy?: Prisma.SavedPostUncheckedUpdateManyWithoutPostNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutPostNestedInput
+  reelViews?: Prisma.ReelViewUncheckedUpdateManyWithoutPostNestedInput
 }
 
 export type PostCreateWithoutCommentsInput = {
@@ -745,10 +880,14 @@ export type PostCreateWithoutCommentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  isReel?: boolean
+  shareToFeed?: boolean
   author: Prisma.UserCreateNestedOneWithoutPostsInput
   media?: Prisma.PostMediaCreateNestedManyWithoutPostInput
   likes?: Prisma.LikeCreateNestedManyWithoutPostInput
   savedBy?: Prisma.SavedPostCreateNestedManyWithoutPostInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutPostInput
+  reelViews?: Prisma.ReelViewCreateNestedManyWithoutPostInput
 }
 
 export type PostUncheckedCreateWithoutCommentsInput = {
@@ -759,9 +898,13 @@ export type PostUncheckedCreateWithoutCommentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  isReel?: boolean
+  shareToFeed?: boolean
   media?: Prisma.PostMediaUncheckedCreateNestedManyWithoutPostInput
   likes?: Prisma.LikeUncheckedCreateNestedManyWithoutPostInput
   savedBy?: Prisma.SavedPostUncheckedCreateNestedManyWithoutPostInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutPostInput
+  reelViews?: Prisma.ReelViewUncheckedCreateNestedManyWithoutPostInput
 }
 
 export type PostCreateOrConnectWithoutCommentsInput = {
@@ -786,10 +929,14 @@ export type PostUpdateWithoutCommentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isReel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareToFeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   author?: Prisma.UserUpdateOneRequiredWithoutPostsNestedInput
   media?: Prisma.PostMediaUpdateManyWithoutPostNestedInput
   likes?: Prisma.LikeUpdateManyWithoutPostNestedInput
   savedBy?: Prisma.SavedPostUpdateManyWithoutPostNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutPostNestedInput
+  reelViews?: Prisma.ReelViewUpdateManyWithoutPostNestedInput
 }
 
 export type PostUncheckedUpdateWithoutCommentsInput = {
@@ -800,9 +947,13 @@ export type PostUncheckedUpdateWithoutCommentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isReel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareToFeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   media?: Prisma.PostMediaUncheckedUpdateManyWithoutPostNestedInput
   likes?: Prisma.LikeUncheckedUpdateManyWithoutPostNestedInput
   savedBy?: Prisma.SavedPostUncheckedUpdateManyWithoutPostNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutPostNestedInput
+  reelViews?: Prisma.ReelViewUncheckedUpdateManyWithoutPostNestedInput
 }
 
 export type PostCreateWithoutSavedByInput = {
@@ -811,10 +962,14 @@ export type PostCreateWithoutSavedByInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  isReel?: boolean
+  shareToFeed?: boolean
   author: Prisma.UserCreateNestedOneWithoutPostsInput
   media?: Prisma.PostMediaCreateNestedManyWithoutPostInput
   likes?: Prisma.LikeCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentCreateNestedManyWithoutPostInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutPostInput
+  reelViews?: Prisma.ReelViewCreateNestedManyWithoutPostInput
 }
 
 export type PostUncheckedCreateWithoutSavedByInput = {
@@ -825,9 +980,13 @@ export type PostUncheckedCreateWithoutSavedByInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  isReel?: boolean
+  shareToFeed?: boolean
   media?: Prisma.PostMediaUncheckedCreateNestedManyWithoutPostInput
   likes?: Prisma.LikeUncheckedCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutPostInput
+  reelViews?: Prisma.ReelViewUncheckedCreateNestedManyWithoutPostInput
 }
 
 export type PostCreateOrConnectWithoutSavedByInput = {
@@ -852,10 +1011,14 @@ export type PostUpdateWithoutSavedByInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isReel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareToFeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   author?: Prisma.UserUpdateOneRequiredWithoutPostsNestedInput
   media?: Prisma.PostMediaUpdateManyWithoutPostNestedInput
   likes?: Prisma.LikeUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutPostNestedInput
+  reelViews?: Prisma.ReelViewUpdateManyWithoutPostNestedInput
 }
 
 export type PostUncheckedUpdateWithoutSavedByInput = {
@@ -866,9 +1029,177 @@ export type PostUncheckedUpdateWithoutSavedByInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isReel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareToFeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   media?: Prisma.PostMediaUncheckedUpdateManyWithoutPostNestedInput
   likes?: Prisma.LikeUncheckedUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutPostNestedInput
+  reelViews?: Prisma.ReelViewUncheckedUpdateManyWithoutPostNestedInput
+}
+
+export type PostCreateWithoutNotificationsInput = {
+  caption?: string
+  location?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  isReel?: boolean
+  shareToFeed?: boolean
+  author: Prisma.UserCreateNestedOneWithoutPostsInput
+  media?: Prisma.PostMediaCreateNestedManyWithoutPostInput
+  likes?: Prisma.LikeCreateNestedManyWithoutPostInput
+  comments?: Prisma.CommentCreateNestedManyWithoutPostInput
+  savedBy?: Prisma.SavedPostCreateNestedManyWithoutPostInput
+  reelViews?: Prisma.ReelViewCreateNestedManyWithoutPostInput
+}
+
+export type PostUncheckedCreateWithoutNotificationsInput = {
+  id?: number
+  authorId: number
+  caption?: string
+  location?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  isReel?: boolean
+  shareToFeed?: boolean
+  media?: Prisma.PostMediaUncheckedCreateNestedManyWithoutPostInput
+  likes?: Prisma.LikeUncheckedCreateNestedManyWithoutPostInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
+  savedBy?: Prisma.SavedPostUncheckedCreateNestedManyWithoutPostInput
+  reelViews?: Prisma.ReelViewUncheckedCreateNestedManyWithoutPostInput
+}
+
+export type PostCreateOrConnectWithoutNotificationsInput = {
+  where: Prisma.PostWhereUniqueInput
+  create: Prisma.XOR<Prisma.PostCreateWithoutNotificationsInput, Prisma.PostUncheckedCreateWithoutNotificationsInput>
+}
+
+export type PostUpsertWithoutNotificationsInput = {
+  update: Prisma.XOR<Prisma.PostUpdateWithoutNotificationsInput, Prisma.PostUncheckedUpdateWithoutNotificationsInput>
+  create: Prisma.XOR<Prisma.PostCreateWithoutNotificationsInput, Prisma.PostUncheckedCreateWithoutNotificationsInput>
+  where?: Prisma.PostWhereInput
+}
+
+export type PostUpdateToOneWithWhereWithoutNotificationsInput = {
+  where?: Prisma.PostWhereInput
+  data: Prisma.XOR<Prisma.PostUpdateWithoutNotificationsInput, Prisma.PostUncheckedUpdateWithoutNotificationsInput>
+}
+
+export type PostUpdateWithoutNotificationsInput = {
+  caption?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isReel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareToFeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  author?: Prisma.UserUpdateOneRequiredWithoutPostsNestedInput
+  media?: Prisma.PostMediaUpdateManyWithoutPostNestedInput
+  likes?: Prisma.LikeUpdateManyWithoutPostNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
+  savedBy?: Prisma.SavedPostUpdateManyWithoutPostNestedInput
+  reelViews?: Prisma.ReelViewUpdateManyWithoutPostNestedInput
+}
+
+export type PostUncheckedUpdateWithoutNotificationsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  authorId?: Prisma.IntFieldUpdateOperationsInput | number
+  caption?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isReel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareToFeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  media?: Prisma.PostMediaUncheckedUpdateManyWithoutPostNestedInput
+  likes?: Prisma.LikeUncheckedUpdateManyWithoutPostNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
+  savedBy?: Prisma.SavedPostUncheckedUpdateManyWithoutPostNestedInput
+  reelViews?: Prisma.ReelViewUncheckedUpdateManyWithoutPostNestedInput
+}
+
+export type PostCreateWithoutReelViewsInput = {
+  caption?: string
+  location?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  isReel?: boolean
+  shareToFeed?: boolean
+  author: Prisma.UserCreateNestedOneWithoutPostsInput
+  media?: Prisma.PostMediaCreateNestedManyWithoutPostInput
+  likes?: Prisma.LikeCreateNestedManyWithoutPostInput
+  comments?: Prisma.CommentCreateNestedManyWithoutPostInput
+  savedBy?: Prisma.SavedPostCreateNestedManyWithoutPostInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutPostInput
+}
+
+export type PostUncheckedCreateWithoutReelViewsInput = {
+  id?: number
+  authorId: number
+  caption?: string
+  location?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  isReel?: boolean
+  shareToFeed?: boolean
+  media?: Prisma.PostMediaUncheckedCreateNestedManyWithoutPostInput
+  likes?: Prisma.LikeUncheckedCreateNestedManyWithoutPostInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
+  savedBy?: Prisma.SavedPostUncheckedCreateNestedManyWithoutPostInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutPostInput
+}
+
+export type PostCreateOrConnectWithoutReelViewsInput = {
+  where: Prisma.PostWhereUniqueInput
+  create: Prisma.XOR<Prisma.PostCreateWithoutReelViewsInput, Prisma.PostUncheckedCreateWithoutReelViewsInput>
+}
+
+export type PostUpsertWithoutReelViewsInput = {
+  update: Prisma.XOR<Prisma.PostUpdateWithoutReelViewsInput, Prisma.PostUncheckedUpdateWithoutReelViewsInput>
+  create: Prisma.XOR<Prisma.PostCreateWithoutReelViewsInput, Prisma.PostUncheckedCreateWithoutReelViewsInput>
+  where?: Prisma.PostWhereInput
+}
+
+export type PostUpdateToOneWithWhereWithoutReelViewsInput = {
+  where?: Prisma.PostWhereInput
+  data: Prisma.XOR<Prisma.PostUpdateWithoutReelViewsInput, Prisma.PostUncheckedUpdateWithoutReelViewsInput>
+}
+
+export type PostUpdateWithoutReelViewsInput = {
+  caption?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isReel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareToFeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  author?: Prisma.UserUpdateOneRequiredWithoutPostsNestedInput
+  media?: Prisma.PostMediaUpdateManyWithoutPostNestedInput
+  likes?: Prisma.LikeUpdateManyWithoutPostNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
+  savedBy?: Prisma.SavedPostUpdateManyWithoutPostNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutPostNestedInput
+}
+
+export type PostUncheckedUpdateWithoutReelViewsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  authorId?: Prisma.IntFieldUpdateOperationsInput | number
+  caption?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isReel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareToFeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  media?: Prisma.PostMediaUncheckedUpdateManyWithoutPostNestedInput
+  likes?: Prisma.LikeUncheckedUpdateManyWithoutPostNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
+  savedBy?: Prisma.SavedPostUncheckedUpdateManyWithoutPostNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutPostNestedInput
 }
 
 export type PostCreateManyAuthorInput = {
@@ -878,6 +1209,8 @@ export type PostCreateManyAuthorInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  isReel?: boolean
+  shareToFeed?: boolean
 }
 
 export type PostUpdateWithoutAuthorInput = {
@@ -886,10 +1219,14 @@ export type PostUpdateWithoutAuthorInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isReel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareToFeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   media?: Prisma.PostMediaUpdateManyWithoutPostNestedInput
   likes?: Prisma.LikeUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   savedBy?: Prisma.SavedPostUpdateManyWithoutPostNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutPostNestedInput
+  reelViews?: Prisma.ReelViewUpdateManyWithoutPostNestedInput
 }
 
 export type PostUncheckedUpdateWithoutAuthorInput = {
@@ -899,10 +1236,14 @@ export type PostUncheckedUpdateWithoutAuthorInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isReel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareToFeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   media?: Prisma.PostMediaUncheckedUpdateManyWithoutPostNestedInput
   likes?: Prisma.LikeUncheckedUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   savedBy?: Prisma.SavedPostUncheckedUpdateManyWithoutPostNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutPostNestedInput
+  reelViews?: Prisma.ReelViewUncheckedUpdateManyWithoutPostNestedInput
 }
 
 export type PostUncheckedUpdateManyWithoutAuthorInput = {
@@ -912,6 +1253,8 @@ export type PostUncheckedUpdateManyWithoutAuthorInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isReel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shareToFeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -924,6 +1267,8 @@ export type PostCountOutputType = {
   likes: number
   comments: number
   savedBy: number
+  notifications: number
+  reelViews: number
 }
 
 export type PostCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -931,6 +1276,8 @@ export type PostCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   likes?: boolean | PostCountOutputTypeCountLikesArgs
   comments?: boolean | PostCountOutputTypeCountCommentsArgs
   savedBy?: boolean | PostCountOutputTypeCountSavedByArgs
+  notifications?: boolean | PostCountOutputTypeCountNotificationsArgs
+  reelViews?: boolean | PostCountOutputTypeCountReelViewsArgs
 }
 
 /**
@@ -971,6 +1318,20 @@ export type PostCountOutputTypeCountSavedByArgs<ExtArgs extends runtime.Types.Ex
   where?: Prisma.SavedPostWhereInput
 }
 
+/**
+ * PostCountOutputType without action
+ */
+export type PostCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.NotificationWhereInput
+}
+
+/**
+ * PostCountOutputType without action
+ */
+export type PostCountOutputTypeCountReelViewsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReelViewWhereInput
+}
+
 
 export type PostSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -980,11 +1341,15 @@ export type PostSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
+  isReel?: boolean
+  shareToFeed?: boolean
   author?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   media?: boolean | Prisma.Post$mediaArgs<ExtArgs>
   likes?: boolean | Prisma.Post$likesArgs<ExtArgs>
   comments?: boolean | Prisma.Post$commentsArgs<ExtArgs>
   savedBy?: boolean | Prisma.Post$savedByArgs<ExtArgs>
+  notifications?: boolean | Prisma.Post$notificationsArgs<ExtArgs>
+  reelViews?: boolean | Prisma.Post$reelViewsArgs<ExtArgs>
   _count?: boolean | Prisma.PostCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["post"]>
 
@@ -996,6 +1361,8 @@ export type PostSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
+  isReel?: boolean
+  shareToFeed?: boolean
   author?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["post"]>
 
@@ -1007,6 +1374,8 @@ export type PostSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
+  isReel?: boolean
+  shareToFeed?: boolean
   author?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["post"]>
 
@@ -1018,15 +1387,19 @@ export type PostSelectScalar = {
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
+  isReel?: boolean
+  shareToFeed?: boolean
 }
 
-export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "authorId" | "caption" | "location" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["post"]>
+export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "authorId" | "caption" | "location" | "createdAt" | "updatedAt" | "deletedAt" | "isReel" | "shareToFeed", ExtArgs["result"]["post"]>
 export type PostInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   author?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   media?: boolean | Prisma.Post$mediaArgs<ExtArgs>
   likes?: boolean | Prisma.Post$likesArgs<ExtArgs>
   comments?: boolean | Prisma.Post$commentsArgs<ExtArgs>
   savedBy?: boolean | Prisma.Post$savedByArgs<ExtArgs>
+  notifications?: boolean | Prisma.Post$notificationsArgs<ExtArgs>
+  reelViews?: boolean | Prisma.Post$reelViewsArgs<ExtArgs>
   _count?: boolean | Prisma.PostCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type PostIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1044,6 +1417,8 @@ export type $PostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     likes: Prisma.$LikePayload<ExtArgs>[]
     comments: Prisma.$CommentPayload<ExtArgs>[]
     savedBy: Prisma.$SavedPostPayload<ExtArgs>[]
+    notifications: Prisma.$NotificationPayload<ExtArgs>[]
+    reelViews: Prisma.$ReelViewPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1053,6 +1428,8 @@ export type $PostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
+    isReel: boolean
+    shareToFeed: boolean
   }, ExtArgs["result"]["post"]>
   composites: {}
 }
@@ -1452,6 +1829,8 @@ export interface Prisma__PostClient<T, Null = never, ExtArgs extends runtime.Typ
   likes<T extends Prisma.Post$likesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$likesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LikePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   comments<T extends Prisma.Post$commentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$commentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   savedBy<T extends Prisma.Post$savedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$savedByArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SavedPostPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  notifications<T extends Prisma.Post$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reelViews<T extends Prisma.Post$reelViewsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$reelViewsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReelViewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1488,6 +1867,8 @@ export interface PostFieldRefs {
   readonly createdAt: Prisma.FieldRef<"Post", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Post", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"Post", 'DateTime'>
+  readonly isReel: Prisma.FieldRef<"Post", 'Boolean'>
+  readonly shareToFeed: Prisma.FieldRef<"Post", 'Boolean'>
 }
     
 
@@ -1982,6 +2363,54 @@ export type Post$savedByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
   take?: number
   skip?: number
   distinct?: Prisma.SavedPostScalarFieldEnum | Prisma.SavedPostScalarFieldEnum[]
+}
+
+/**
+ * Post.notifications
+ */
+export type Post$notificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Notification
+   */
+  select?: Prisma.NotificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Notification
+   */
+  omit?: Prisma.NotificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationInclude<ExtArgs> | null
+  where?: Prisma.NotificationWhereInput
+  orderBy?: Prisma.NotificationOrderByWithRelationInput | Prisma.NotificationOrderByWithRelationInput[]
+  cursor?: Prisma.NotificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.NotificationScalarFieldEnum | Prisma.NotificationScalarFieldEnum[]
+}
+
+/**
+ * Post.reelViews
+ */
+export type Post$reelViewsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ReelView
+   */
+  select?: Prisma.ReelViewSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ReelView
+   */
+  omit?: Prisma.ReelViewOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReelViewInclude<ExtArgs> | null
+  where?: Prisma.ReelViewWhereInput
+  orderBy?: Prisma.ReelViewOrderByWithRelationInput | Prisma.ReelViewOrderByWithRelationInput[]
+  cursor?: Prisma.ReelViewWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReelViewScalarFieldEnum | Prisma.ReelViewScalarFieldEnum[]
 }
 
 /**

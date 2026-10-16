@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '../generated/prisma/client';
 import { PostsService } from '../posts/posts.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { toAvatarUrl } from '../common/public-url';
 import { UserPostsQueryDto } from '../posts/dto/user-posts-query.dto';
 import { FollowListQueryDto } from './dto/follow-list-query.dto';
@@ -38,6 +39,7 @@ export class UsersService {
   constructor(
     private prisma: PrismaService,
     private posts: PostsService,
+    private notifications: NotificationsService,
   ) {}
 
   // Trang profile công khai: không trả email / role như /auth/me
@@ -130,6 +132,12 @@ export class UsersService {
     return this.posts.findByUser(userId, q, viewerId);
   }
 
+  // Tab Reels trên profile
+  async findReels(username: string, q: UserPostsQueryDto, viewerId?: number) {
+    const userId = await this.findId(username);
+    return this.posts.findByUser(userId, q, viewerId, true);
+  }
+
   // Người đang follow :username
   async findFollowers(
     username: string,
@@ -164,18 +172,32 @@ export class UsersService {
     if (userId === viewerId) {
       throw new BadRequestException('You cannot follow yourself');
     }
-    await this.prisma.follow.createMany({
+    const { count } = await this.prisma.follow.createMany({
       data: { followerId: viewerId, followingId: userId },
       skipDuplicates: true,
     });
+    if (count) {
+      await this.notifications.notify({
+        type: 'FOLLOW',
+        recipientId: userId,
+        actorId: viewerId,
+      });
+    }
     return this.followState(userId, true);
   }
 
   async unfollow(username: string, viewerId: number) {
     const userId = await this.findId(username);
-    await this.prisma.follow.deleteMany({
+    const { count } = await this.prisma.follow.deleteMany({
       where: { followerId: viewerId, followingId: userId },
     });
+    if (count) {
+      await this.notifications.retract({
+        type: 'FOLLOW',
+        actorId: viewerId,
+        recipientId: userId,
+      });
+    }
     return this.followState(userId, false);
   }
 

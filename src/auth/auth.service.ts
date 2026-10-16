@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { UploadsService } from '../uploads/uploads.service';
+import { PresenceService } from '../realtime/presence.service';
 import { User } from '../generated/prisma/client';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -21,6 +22,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwt: JwtService,
     private uploads: UploadsService,
+    private presence: PresenceService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -99,8 +101,14 @@ export class AuthService {
         username: dto.username,
         bio: dto.bio,
         avatarUrl: await this.resolveAvatar(userId, dto.avatarUrl),
+        showActivityStatus: dto.showActivityStatus,
       },
     });
+    // bật / tắt trạng thái hoạt động -> người đang chat cùng thấy thay đổi ngay
+    if (dto.showActivityStatus !== undefined) {
+      await this.presence.broadcast(userId);
+      await this.presence.refreshFor(userId);
+    }
     return this.toProfile(user);
   }
 

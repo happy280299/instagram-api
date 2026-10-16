@@ -1,5 +1,6 @@
 import { Transform } from 'class-transformer';
 import {
+  IsBoolean,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -43,4 +44,9 @@ export class UpdateProfileDto {
   @ValidateIf((_, v) => v !== '')
   @IsUrl({ require_protocol: true, require_tld: false })
   avatarUrl?: string;
+
+  // Cài đặt "Hiển thị trạng thái hoạt động" (tắt thì 2 bên không thấy của nhau)
+  @IsOptional()
+  @IsBoolean()
+  showActivityStatus?: boolean;
 }

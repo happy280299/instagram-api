@@ -333,17 +333,20 @@ export class StoriesService {
     }
   }
 
-  // Cùng 1 URL upload có thể đã được dùng cho post / avatar / story khác -> còn dùng thì giữ file
+  // Cùng 1 URL upload có thể đã được dùng cho post / avatar / story / tin nhắn khác -> còn dùng thì giữ file
   private async deleteMediaIfUnused(
     url: string,
     db: Prisma.TransactionClient = this.prisma,
   ) {
-    const [posts, avatars, stories] = await Promise.all([
+    const [posts, avatars, stories, messages] = await Promise.all([
       db.postMedia.count({ where: { url } }),
       db.user.count({ where: { avatarUrl: url } }),
       db.story.count({ where: { mediaUrl: url } }),
+      // ảnh / video đã gửi trong tin nhắn
+      db.message.count({ where: { mediaUrl: url } }),
     ]);
-    if (posts + avatars + stories === 0) await this.uploads.remove(url);
+    if (posts + avatars + stories + messages === 0)
+      await this.uploads.remove(url);
   }
 
   private async trayAuthorIds(viewerId: number) {

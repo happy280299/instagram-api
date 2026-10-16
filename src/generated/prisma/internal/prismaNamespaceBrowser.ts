@@ -61,7 +61,12 @@ export const ModelName = {
   SavedPost: 'SavedPost',
   Follow: 'Follow',
   Story: 'Story',
-  StoryView: 'StoryView'
+  StoryView: 'StoryView',
+  Notification: 'Notification',
+  Conversation: 'Conversation',
+  ConversationMember: 'ConversationMember',
+  Message: 'Message',
+  ReelView: 'ReelView'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -90,6 +95,8 @@ export const UserScalarFieldEnum = {
   avatarUrl: 'avatarUrl',
   bio: 'bio',
   isVerified: 'isVerified',
+  lastActiveAt: 'lastActiveAt',
+  showActivityStatus: 'showActivityStatus',
   role: 'role',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -133,7 +140,9 @@ export const PostScalarFieldEnum = {
   location: 'location',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
+  deletedAt: 'deletedAt',
+  isReel: 'isReel',
+  shareToFeed: 'shareToFeed'
 } as const
 
 export type PostScalarFieldEnum = (typeof PostScalarFieldEnum)[keyof typeof PostScalarFieldEnum]
@@ -210,6 +219,66 @@ export const StoryViewScalarFieldEnum = {
 } as const
 
 export type StoryViewScalarFieldEnum = (typeof StoryViewScalarFieldEnum)[keyof typeof StoryViewScalarFieldEnum]
+
+
+export const NotificationScalarFieldEnum = {
+  id: 'id',
+  recipientId: 'recipientId',
+  actorId: 'actorId',
+  type: 'type',
+  postId: 'postId',
+  commentId: 'commentId',
+  createdAt: 'createdAt',
+  readAt: 'readAt'
+} as const
+
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const ConversationScalarFieldEnum = {
+  id: 'id',
+  directKey: 'directKey',
+  createdAt: 'createdAt',
+  lastMessageAt: 'lastMessageAt',
+  lastMessageId: 'lastMessageId'
+} as const
+
+export type ConversationScalarFieldEnum = (typeof ConversationScalarFieldEnum)[keyof typeof ConversationScalarFieldEnum]
+
+
+export const ConversationMemberScalarFieldEnum = {
+  conversationId: 'conversationId',
+  userId: 'userId',
+  joinedAt: 'joinedAt',
+  lastReadMessageId: 'lastReadMessageId'
+} as const
+
+export type ConversationMemberScalarFieldEnum = (typeof ConversationMemberScalarFieldEnum)[keyof typeof ConversationMemberScalarFieldEnum]
+
+
+export const MessageScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  senderId: 'senderId',
+  content: 'content',
+  mediaUrl: 'mediaUrl',
+  mediaType: 'mediaType',
+  mediaWidth: 'mediaWidth',
+  mediaHeight: 'mediaHeight',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
+
+
+export const ReelViewScalarFieldEnum = {
+  userId: 'userId',
+  postId: 'postId',
+  createdAt: 'createdAt'
+} as const
+
+export type ReelViewScalarFieldEnum = (typeof ReelViewScalarFieldEnum)[keyof typeof ReelViewScalarFieldEnum]
 
 
 export const SortOrder = {

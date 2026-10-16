@@ -1,5 +1,6 @@
 import { Transform, Type } from 'class-transformer';
 import {
+  IsBoolean,
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
@@ -50,4 +51,9 @@ export class CreatePostDto {
   @ValidateNested({ each: true })
   @Type(() => CreatePostMediaDto)
   media!: CreatePostMediaDto[];
+
+  // Chỉ có tác dụng khi bài là Reel (đúng 1 video): có hiện ở feed + lưới bài chính không
+  @IsOptional()
+  @IsBoolean()
+  shareToFeed?: boolean;
 }

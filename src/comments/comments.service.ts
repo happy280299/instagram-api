@@ -9,6 +9,7 @@ import { toAvatarUrl } from '../common/public-url';
 import { JwtPayload } from '../auth/jwt-payload';
 import { CommentQueryDto } from './dto/comment-query.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 const commentSelect = {
   id: true,
@@ -23,7 +24,10 @@ type CommentRow = Prisma.CommentGetPayload<{ select: typeof commentSelect }>;
 
 @Injectable()
 export class CommentsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notifications: NotificationsService,
+  ) {}
 
   async findAll(postId: number, q: CommentQueryDto, viewerId?: number) {
     await this.ensurePost(postId);
@@ -50,10 +54,18 @@ export class CommentsService {
   }
 
   async create(postId: number, dto: CreateCommentDto, userId: number) {
-    await this.ensurePost(postId);
+    const post = await this.ensurePost(postId);
     const comment = await this.prisma.comment.create({
       data: { postId, authorId: userId, content: dto.content },
       select: commentSelect,
+    });
+    // Xoá comment thì thông báo này tự mất (Cascade theo commentId)
+    await this.notifications.notify({
+      type: 'COMMENT',
+      recipientId: post.authorId,
+      actorId: userId,
+      postId,
+      commentId: comment.id,
     });
     return toComment(comment, userId);
   }
@@ -75,15 +87,18 @@ export class CommentsService {
     }
 
     await this.prisma.comment.delete({ where: { id } });
+    // thông báo COMMENT bị xoá theo Cascade -> cập nhật lại chấm đỏ của chủ bài
+    await this.notifications.syncUnreadCount(comment.post.authorId);
     return null;
   }
 
   private async ensurePost(postId: number) {
     const post = await this.prisma.post.findFirst({
       where: { id: postId, deletedAt: null },
-      select: { id: true },
+      select: { id: true, authorId: true },
     });
     if (!post) throw new NotFoundException('Không tìm thấy bài viết');
+    return post;
   }
 }
 

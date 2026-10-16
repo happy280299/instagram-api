@@ -10,6 +10,9 @@ import { StoriesModule } from './stories/stories.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { PostsModule } from './posts/posts.module';
 import { UsersModule } from './users/users.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { RealtimeModule } from './realtime/realtime.module';
+import { ChatModule } from './chat/chat.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { ScheduleModule } from '@nestjs/schedule';
 import { join } from 'path';
@@ -31,6 +34,9 @@ import { join } from 'path';
     UploadsModule,
     PostsModule,
     UsersModule,
+    NotificationsModule,
+    RealtimeModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

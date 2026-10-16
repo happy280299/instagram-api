@@ -18,20 +18,29 @@ enum MediaType {
   VIDEO
 }
 
+enum NotificationType {
+  LIKE
+  COMMENT
+  FOLLOW
+}
+
 model User {
-  id         Int      @id @default(autoincrement())
-  email      String   @unique
-  username   String   @unique
-  password   String
-  name       String
+  id                 Int       @id @default(autoincrement())
+  email              String    @unique
+  username           String    @unique
+  password           String
+  name               String
   // name đã chuẩn hoá cho tìm kiếm (toSearchText): 'Nguyễn Văn A' -> 'nguyen van a'
-  nameSearch String   @default("")
-  avatarUrl  String   @default("")
-  bio        String   @default("")
-  isVerified Boolean  @default(false)
-  role       Role     @default(USER)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  nameSearch         String    @default("")
+  avatarUrl          String    @default("")
+  bio                String    @default("")
+  isVerified         Boolean   @default(false)
+  // Trạng thái hoạt động (chat): lần cuối còn mở app; tắt showActivityStatus thì 2 bên không thấy của nhau
+  lastActiveAt       DateTime?
+  showActivityStatus Boolean   @default(true)
+  role               Role      @default(USER)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   posts      Post[]
   likes      Like[]
@@ -41,6 +50,13 @@ model User {
   following  Follow[]    @relation("follower")
   stories    Story[]
   storyViews StoryView[]
+
+  notifications     Notification[] @relation("notificationRecipient")
+  notificationsSent Notification[] @relation("notificationActor")
+
+  conversations ConversationMember[]
+  messages      Message[]
+  reelViews     ReelView[]
 
   // Tìm user (GET /users/search): ILIKE '%...%' + similarity() dùng index trigram (pg_trgm)
   @@index([username(ops: raw("gin_trgm_ops"))], type: Gin, map: "User_username_trgm_idx")
@@ -75,21 +91,30 @@ model Product {
 }
 
 model Post {
-  id        Int       @id @default(autoincrement())
-  authorId  Int
-  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  caption   String    @default("")
-  location  String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  id          Int       @id @default(autoincrement())
+  authorId    Int
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  caption     String    @default("")
+  location    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  // Bài có đúng 1 video = Reel (giống Instagram), BE tự gắn lúc tạo
+  isReel      Boolean   @default(false)
+  // Reel: có hiện ở feed + lưới bài chính trên profile không (tab Reels thì luôn có)
+  shareToFeed Boolean   @default(true)
 
   media    PostMedia[]
   likes    Like[]
   comments Comment[]
   savedBy  SavedPost[]
 
+  notifications Notification[]
+  reelViews     ReelView[]
+
   @@index([authorId, createdAt])
+  // tab Reels + tab Reels trên profile
+  @@index([isReel, createdAt])
   @@index([createdAt])
 }
 
@@ -125,6 +150,8 @@ model Comment {
   author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   content   String
   createdAt DateTime @default(now())
+
+  notifications Notification[]
 
   @@index([postId, createdAt])
 }
@@ -181,4 +208,92 @@ model StoryView {
 
   @@id([storyId, viewerId])
   @@index([viewerId])
+}
+
+// Mỗi hành động (like / comment / follow) = 1 dòng; gộp "A và 12 người khác" lúc đọc.
+// Xoá post / comment / user thì thông báo liên quan tự mất (Cascade)
+model Notification {
+  id          Int              @id @default(autoincrement())
+  recipientId Int
+  recipient   User             @relation("notificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  actorId     Int
+  actor       User             @relation("notificationActor", fields: [actorId], references: [id], onDelete: Cascade)
+  type        NotificationType
+  postId      Int?
+  post        Post?            @relation(fields: [postId], references: [id], onDelete: Cascade)
+  commentId   Int?
+  comment     Comment?         @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  createdAt   DateTime         @default(now())
+  readAt      DateTime? // null = chưa đọc
+
+  @@index([recipientId, createdAt])
+  @@index([recipientId, readAt])
+  // tìm để xoá khi bỏ like / bỏ follow
+  @@index([actorId, type])
+  @@index([postId])
+  @@index([commentId])
+  // job dọn thông báo cũ
+  @@index([createdAt])
+}
+
+// Chat (Direct). Hiện mới có chat 1-1; thành viên để ở bảng riêng để sau này mở rộng sang group
+model Conversation {
+  id            Int       @id @default(autoincrement())
+  // Chat 1-1: "<userId nhỏ>:<userId lớn>" -> mỗi cặp chỉ có 1 cuộc trò chuyện. Group: null
+  directKey     String?   @unique
+  createdAt     DateTime  @default(now())
+  // Tin nhắn mới nhất (để sắp xếp hộp thư + hiện preview), null = chưa nhắn gì
+  lastMessageAt DateTime?
+  lastMessageId Int?
+
+  members  ConversationMember[]
+  messages Message[]
+
+  @@index([lastMessageAt])
+}
+
+model ConversationMember {
+  conversationId    Int
+  userId            Int
+  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt          DateTime     @default(now())
+  // Đã đọc tới tin nhắn nào: tính số chưa đọc + hiện "Đã xem" cho người kia
+  lastReadMessageId Int?
+
+  @@id([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             Int          @id @default(autoincrement())
+  conversationId Int
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       Int
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  content        String       @default("")
+  // Ảnh / video gửi kèm (URL do POST /uploads trả về)
+  mediaUrl       String?
+  mediaType      MediaType?
+  mediaWidth     Int?
+  mediaHeight    Int?
+  createdAt      DateTime     @default(now())
+  // Thu hồi tin nhắn: ẩn với mọi người
+  deletedAt      DateTime?
+
+  // Tải tin nhắn theo trang (id giảm dần) trong 1 cuộc trò chuyện
+  @@index([conversationId, id])
+  @@index([senderId])
+}
+
+// 1 người xem 1 reel (đủ ~3s) = 1 lượt xem; còn dùng để không gợi ý lại reel đã xem
+model ReelView {
+  userId    Int
+  postId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, postId])
+  @@index([postId])
 }
