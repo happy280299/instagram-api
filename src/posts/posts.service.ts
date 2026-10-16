@@ -89,6 +89,51 @@ export class PostsService {
     return this.likeState(postId, false);
   }
 
+  // Lưu / bỏ lưu: idempotent giống like. Chỉ chủ tài khoản thấy mình đã lưu gì
+  async save(postId: number, userId: number) {
+    await this.ensurePost(postId);
+    await this.prisma.savedPost.createMany({
+      data: { postId, userId },
+      skipDuplicates: true,
+    });
+    return { postId, isSaved: true };
+  }
+
+  async unsave(postId: number, userId: number) {
+    await this.ensurePost(postId);
+    await this.prisma.savedPost.deleteMany({ where: { postId, userId } });
+    return { postId, isSaved: false };
+  }
+
+  // Tab "Saved" trên profile của chính mình: lưu gần đây nhất trước.
+  // Cursor = postId của bài cuối trang, ghép với userId thành khoá chính (userId, postId)
+  async findSaved(userId: number, q: UserPostsQueryDto) {
+    const rows = await this.prisma.savedPost.findMany({
+      // bài đã bị xoá (soft delete) thì ẩn khỏi danh sách
+      where: { userId, post: { deletedAt: null } },
+      orderBy: [{ createdAt: 'desc' }, { postId: 'desc' }],
+      take: q.limit + 1,
+      ...(q.cursor
+        ? {
+            cursor: { userId_postId: { userId, postId: q.cursor } },
+            skip: 1,
+          }
+        : {}),
+      select: { post: { include: postInclude(userId) } },
+    });
+    const hasMore = rows.length > q.limit;
+    const posts = (hasMore ? rows.slice(0, q.limit) : rows).map((r) => r.post);
+
+    return {
+      data: posts.map((p) => toFeedPost(p, userId)),
+      meta: {
+        limit: q.limit,
+        nextCursor: hasMore ? posts[posts.length - 1].id : null,
+        hasMore,
+      },
+    };
+  }
+
   // Trả likeCount mới để FE cập nhật lại số đã tăng/giảm trước (optimistic update)
   private async likeState(postId: number, isLiked: boolean) {
     const likeCount = await this.prisma.like.count({ where: { postId } });

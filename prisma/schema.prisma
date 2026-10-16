@@ -137,6 +137,8 @@ model SavedPost {
   createdAt DateTime @default(now())
 
   @@id([userId, postId])
+  // Danh sách bài đã lưu của 1 user, lưu gần đây nhất trước
+  @@index([userId, createdAt])
 }
 
 model Follow {

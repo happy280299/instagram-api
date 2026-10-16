@@ -7,10 +7,12 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
+import { UserPostsQueryDto } from './dto/user-posts-query.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -26,6 +28,16 @@ export class PostsController {
   @ResponseMessage('Post created')
   create(@Body() dto: CreatePostDto, @CurrentUser() user: JwtPayload) {
     return this.posts.create(dto, user.sub);
+  }
+
+  // Phải khai báo trước ':id', không thì 'saved' bị coi là id
+  @Get('saved')
+  @UseGuards(JwtAuthGuard)
+  findSaved(
+    @Query() query: UserPostsQueryDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.posts.findSaved(user.sub, query);
   }
 
   @Get(':id')
@@ -53,5 +65,23 @@ export class PostsController {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.posts.unlike(id, user.sub);
+  }
+
+  @Post(':id/save')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
+  @ResponseMessage('Saved')
+  save(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: JwtPayload) {
+    return this.posts.save(id, user.sub);
+  }
+
+  @Delete(':id/save')
+  @UseGuards(JwtAuthGuard)
+  @ResponseMessage('Removed from saved')
+  unsave(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.posts.unsave(id, user.sub);
   }
 }
