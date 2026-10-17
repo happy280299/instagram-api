@@ -13,6 +13,7 @@ import { User } from '../generated/prisma/client';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { toAvatarUrl, toPublicUrl } from '../common/public-url';
 import { toSearchText } from '../common/search-text';
 
@@ -73,6 +74,31 @@ export class AuthService {
       throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
 
     return this.buildAuthResponse(user, userAgent);
+  }
+
+  // Đổi mật khẩu -> đăng xuất mọi thiết bị khác, cấp cặp token mới cho thiết bị đang dùng
+  async changePassword(
+    userId: number,
+    dto: ChangePasswordDto,
+    userAgent?: string,
+  ) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new UnauthorizedException();
+    if (!(await bcrypt.compare(dto.currentPassword, user.password))) {
+      throw new BadRequestException('Current password is incorrect');
+    }
+    if (dto.currentPassword === dto.newPassword) {
+      throw new BadRequestException(
+        'New password must be different from the current one',
+      );
+    }
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: await bcrypt.hash(dto.newPassword, 10) },
+    });
+    await this.tokens.revokeAll(userId);
+    return this.tokens.issue(user, userAgent);
   }
 
   async me(userId: number) {

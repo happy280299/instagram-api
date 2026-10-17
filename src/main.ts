@@ -1,4 +1,6 @@
 import 'dotenv/config';
+// Sentry phải khởi tạo trước khi nạp các module khác
+import './instrument';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';

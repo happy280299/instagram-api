@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Response } from 'express';
+import * as Sentry from '@sentry/nestjs';
 
 // Đưa mọi lỗi về cùng format với response thành công:
 // { success: false, statusCode, message, errors? }
@@ -37,8 +38,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
         message = raw ?? exception.message;
       }
     } else {
-      // Lỗi không lường trước: log đầy đủ, không lộ chi tiết ra ngoài
+      // Lỗi không lường trước: log đầy đủ + gửi Sentry, không lộ chi tiết ra ngoài.
+      // Lỗi HttpException (400, 401, 404...) là bình thường -> không gửi
       this.logger.error(exception);
+      Sentry.captureException(exception);
     }
 
     res.status(statusCode).json({

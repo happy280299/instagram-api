@@ -18,6 +18,7 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ResponseMessage } from '../common/response-message.decorator';
 import { RateLimit } from '../common/rate-limits';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { TokensService } from './tokens.service';
 
 @Controller('auth')
@@ -43,6 +44,19 @@ export class AuthController {
   @ResponseMessage('Login success')
   login(@Body() dto: LoginDto, @Headers('user-agent') userAgent?: string) {
     return this.auth.login(dto, userAgent);
+  }
+
+  // Trả cặp token mới: các thiết bị khác bị đăng xuất, FE lưu lại token mới cho thiết bị này
+  @RateLimit.Auth
+  @Patch('password')
+  @UseGuards(JwtAuthGuard)
+  @ResponseMessage('Password changed')
+  changePassword(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: ChangePasswordDto,
+    @Headers('user-agent') userAgent?: string,
+  ) {
+    return this.auth.changePassword(user.sub, dto, userAgent);
   }
 
   // accessToken hết hạn (401) -> đổi refreshToken lấy cặp token mới.

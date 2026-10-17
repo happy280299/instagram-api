@@ -16,6 +16,7 @@ import { ChatModule } from './chat/chat.module';
 import { HashtagsModule } from './hashtags/hashtags.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { ScheduleModule } from '@nestjs/schedule';
+import { SentryModule } from '@sentry/nestjs/setup';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { AppThrottlerGuard } from './common/app-throttler.guard';
@@ -23,6 +24,8 @@ import { join } from 'path';
 
 @Module({
   imports: [
+    // Sentry: gắn thông tin request vào lỗi gửi lên (chỉ hoạt động khi có SENTRY_DSN)
+    SentryModule.forRoot(),
     // cron job: dọn story hết hạn (StoriesService.purgeExpired)
     ScheduleModule.forRoot(),
     // rate limit mặc định: 120 request / phút / user (hoặc IP nếu chưa đăng nhập)

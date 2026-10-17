@@ -1,11 +1,19 @@
 import 'dotenv/config';
 import { existsSync } from 'fs';
+import { randomBytes } from 'crypto';
 import { join } from 'path';
 import * as bcrypt from 'bcrypt';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client';
 import { slugify } from '../src/common/slugify';
 import { toSearchText } from '../src/common/search-text';
+
+// Mật khẩu tài khoản seed. ADMIN không bao giờ dùng mật khẩu cố định trong code:
+// không đặt SEED_ADMIN_PASSWORD thì sinh ngẫu nhiên và in ra 1 lần
+const ADMIN_PASSWORD =
+  process.env.SEED_ADMIN_PASSWORD ?? randomBytes(12).toString('base64url');
+// Tài khoản demo (USER) - đổi bằng SEED_USER_PASSWORD nếu cần
+const USER_PASSWORD = process.env.SEED_USER_PASSWORD ?? 'user123';
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }),
@@ -96,18 +104,23 @@ async function main() {
       email: 'admin@shop.dev',
       username: 'admin',
       name: 'Admin',
-      password: 'admin123',
+      password: ADMIN_PASSWORD,
       role: 'ADMIN' as const,
     },
     {
       email: 'user@shop.dev',
       username: 'nguyenvana',
       name: 'Nguyễn Văn A',
-      password: 'user123',
+      password: USER_PASSWORD,
       role: 'USER' as const,
     },
   ];
   for (const a of accounts) {
+    const existed = await prisma.user.findUnique({
+      where: { email: a.email },
+      select: { id: true },
+    });
+    // tài khoản đã có thì giữ nguyên mật khẩu (không reset về giá trị seed)
     await prisma.user.upsert({
       where: { email: a.email },
       update: {
@@ -122,6 +135,11 @@ async function main() {
         password: await bcrypt.hash(a.password, 10),
       },
     });
+    if (!existed && a.role === 'ADMIN' && !process.env.SEED_ADMIN_PASSWORD) {
+      console.log(
+        `Admin ${a.email} - mật khẩu (chỉ hiện 1 lần): ${a.password}`,
+      );
+    }
   }
 
   await seedFeed();
@@ -189,7 +207,7 @@ const COMMENTS = [
 ];
 
 async function seedFeed() {
-  const password = await bcrypt.hash('user123', 10);
+  const password = await bcrypt.hash(USER_PASSWORD, 10);
   for (const [username, name, bio, isVerified] of CREATORS) {
     await prisma.user.upsert({
       where: { email: `${username}@shop.dev` },
