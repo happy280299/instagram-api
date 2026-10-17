@@ -13,6 +13,8 @@ import {
   UploadApiResponse,
 } from 'cloudinary';
 import { toPublicUrl, toVideoThumbnailUrl } from '../common/public-url';
+import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '../generated/prisma/client';
 
 // Multer chặn ở mức lớn nhất (video), ảnh bị kiểm tra lại riêng bên dưới
 export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
@@ -79,6 +81,23 @@ export type UploadedMedia = {
 
 @Injectable()
 export class UploadsService {
+  constructor(private prisma: PrismaService) {}
+
+  // Xoá file nếu không còn chỗ nào dùng: 1 URL upload có thể được dùng lại cho post / avatar /
+  // story / tin nhắn. Truyền `db` khi gọi trong transaction (dòng vừa xoá chưa commit)
+  async removeIfUnused(
+    url: string,
+    db: Prisma.TransactionClient = this.prisma,
+  ) {
+    const [posts, avatars, stories, messages] = await Promise.all([
+      db.postMedia.count({ where: { url } }),
+      db.user.count({ where: { avatarUrl: url } }),
+      db.story.count({ where: { mediaUrl: url } }),
+      db.message.count({ where: { mediaUrl: url } }),
+    ]);
+    if (posts + avatars + stories + messages === 0) await this.remove(url);
+  }
+
   async save(file?: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException('Please choose a photo or video to upload');

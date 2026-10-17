@@ -34,6 +34,8 @@ export function postInclude(viewerId?: number) {
     },
     // 2 comment mới nhất để hiện dưới post, giống Instagram
     comments: {
+      // chỉ comment gốc, không lấy câu trả lời
+      where: { parentId: null },
       orderBy: { createdAt: 'desc' },
       take: 2,
       select: {

@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  Patch,
   Param,
   ParseIntPipe,
   Post,
@@ -12,17 +13,20 @@ import {
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
 import { UserPostsQueryDto } from './dto/user-posts-query.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { JwtPayload } from '../auth/jwt-payload';
 import { ResponseMessage } from '../common/response-message.decorator';
+import { RateLimit } from '../common/rate-limits';
 
 @Controller('posts')
 export class PostsController {
   constructor(private posts: PostsService) {}
 
+  @RateLimit.CreatePost
   @Post()
   @UseGuards(JwtAuthGuard)
   @ResponseMessage('Post created')
@@ -83,5 +87,26 @@ export class PostsController {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.posts.unsave(id, user.sub);
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard)
+  @ResponseMessage('Post updated')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdatePostDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.posts.update(id, dto, user.sub);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  @ResponseMessage('Post deleted')
+  remove(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.posts.remove(id, user);
   }
 }

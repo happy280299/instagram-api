@@ -11,6 +11,7 @@ import { toAvatarUrl } from '../common/public-url';
 import { UserPostsQueryDto } from '../posts/dto/user-posts-query.dto';
 import { FollowListQueryDto } from './dto/follow-list-query.dto';
 import { SearchUsersQueryDto } from './dto/search-users-query.dto';
+import { SuggestionsQueryDto } from './dto/suggestions-query.dto';
 import { toSearchText } from '../common/search-text';
 
 const listUserSelect = {
@@ -125,6 +126,82 @@ export class UsersService {
       avatarUrl: toAvatarUrl(u.avatarUrl),
       isMe: u.id === viewerId,
     }));
+  }
+
+  // "Gợi ý cho bạn": người mình chưa follow, xếp theo
+  //   5 nếu họ đang follow mình (gợi ý follow lại) + 3 x số bạn chung + ln(1 + số follower)
+  // (bạn chung = người mình follow cũng đang follow họ). Khách: người nhiều follower nhất
+  async suggestions(q: SuggestionsQueryDto, viewerId?: number) {
+    const me = viewerId ?? 0;
+    const rows = await this.prisma.$queryRaw<
+      {
+        id: number;
+        mutualCount: number;
+        followsYou: boolean;
+        followerCount: number;
+      }[]
+    >`
+      SELECT * FROM (
+        SELECT u.id,
+               (SELECT count(*)::int FROM "Follow" f
+                JOIN "Follow" mine ON mine."followingId" = f."followerId"
+                                  AND mine."followerId" = ${me}
+                WHERE f."followingId" = u.id) AS "mutualCount",
+               EXISTS (SELECT 1 FROM "Follow" f
+                       WHERE f."followerId" = u.id AND f."followingId" = ${me}) AS "followsYou",
+               (SELECT count(*)::int FROM "Follow" f WHERE f."followingId" = u.id) AS "followerCount"
+        FROM "User" u
+        WHERE u.id <> ${me}
+          AND NOT EXISTS (SELECT 1 FROM "Follow" f
+                          WHERE f."followerId" = ${me} AND f."followingId" = u.id)
+      ) s
+      ORDER BY (5 * s."followsYou"::int + 3 * s."mutualCount" + ln(1 + s."followerCount")) DESC,
+               s.id DESC
+      LIMIT ${q.limit}
+    `;
+    const ids = rows.map((r) => r.id);
+
+    const [users, mutuals] = await Promise.all([
+      this.prisma.user.findMany({
+        where: { id: { in: ids } },
+        select: listUserSelect,
+      }),
+      // tối đa 2 tên bạn chung cho mỗi người: "Có A, B + 3 người khác theo dõi"
+      viewerId
+        ? this.prisma.follow.findMany({
+            where: {
+              followingId: { in: ids },
+              follower: { followers: { some: { followerId: viewerId } } },
+            },
+            orderBy: { createdAt: 'desc' },
+            select: {
+              followingId: true,
+              follower: { select: { username: true } },
+            },
+          })
+        : [],
+    ]);
+    const userById = new Map(users.map((u) => [u.id, u]));
+    const mutualNames = new Map<number, string[]>();
+    for (const m of mutuals) {
+      const names = mutualNames.get(m.followingId) ?? [];
+      if (names.length < 2) names.push(m.follower.username);
+      mutualNames.set(m.followingId, names);
+    }
+
+    return rows.map((r) => {
+      const u = userById.get(r.id)!;
+      return {
+        ...u,
+        avatarUrl: toAvatarUrl(u.avatarUrl),
+        followerCount: r.followerCount,
+        // lý do gợi ý để FE hiện: followsYou -> "Đang theo dõi bạn";
+        // mutualCount > 0 -> "Có <mutuals[0]> + N người khác theo dõi"; còn lại -> "Gợi ý cho bạn"
+        followsYou: r.followsYou,
+        mutualCount: r.mutualCount,
+        mutuals: mutualNames.get(r.id) ?? [],
+      };
+    });
   }
 
   async findPosts(username: string, q: UserPostsQueryDto, viewerId?: number) {

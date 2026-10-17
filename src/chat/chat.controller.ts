@@ -19,6 +19,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { JwtPayload } from '../auth/jwt-payload';
 import { ResponseMessage } from '../common/response-message.decorator';
+import { RateLimit } from '../common/rate-limits';
 
 // Gửi tin nhắn qua REST (có validate + lưu DB), nhận tin mới qua socket 'message:new'
 @Controller()
@@ -63,6 +64,7 @@ export class ChatController {
     return this.chat.findMessages(id, user.sub, query);
   }
 
+  @RateLimit.Message
   @Post('conversations/:id/messages')
   @ResponseMessage('Message sent')
   send(

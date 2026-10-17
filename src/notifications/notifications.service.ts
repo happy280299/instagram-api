@@ -10,6 +10,7 @@ import {
 import { NotificationQueryDto } from './dto/notification-query.dto';
 import { RealtimeService } from '../realtime/realtime.service';
 import { RealtimeEvent } from '../realtime/realtime.events';
+import { MAX_MENTIONS } from '../common/text-entities';
 
 // "A, B và 12 người khác đã thích..." -> hiện tối đa chừng này avatar
 const PREVIEW_ACTORS = 2;
@@ -64,6 +65,7 @@ export class NotificationsService {
     actorId: number;
     postId?: number;
     recipientId?: number;
+    commentId?: number | null;
   }) {
     try {
       // cần biết ai mất thông báo để cập nhật lại chấm đỏ của họ
@@ -82,6 +84,32 @@ export class NotificationsService {
       this.logger.warn(
         `retract ${where.type} failed: ${(err as Error).message}`,
       );
+    }
+  }
+
+  // @nhắc tên trong caption (commentId = undefined) hoặc comment. `skip`: người đã nhận
+  // thông báo khác cho cùng hành động (vd. chủ bài đã nhận COMMENT) -> không báo 2 lần
+  async notifyMentions(input: {
+    usernames: string[];
+    actorId: number;
+    postId: number;
+    commentId?: number;
+    skip?: number[];
+  }) {
+    if (!input.usernames.length) return;
+    const users = await this.prisma.user.findMany({
+      where: { username: { in: input.usernames.slice(0, MAX_MENTIONS) } },
+      select: { id: true },
+    });
+    for (const { id } of users) {
+      if (input.skip?.includes(id)) continue;
+      await this.notify({
+        type: 'MENTION',
+        recipientId: id,
+        actorId: input.actorId,
+        postId: input.postId,
+        commentId: input.commentId,
+      });
     }
   }
 
@@ -110,7 +138,8 @@ export class NotificationsService {
     await this.syncUnreadCount(userId);
   }
 
-  // Màn Activity: like cùng 1 bài trong cùng 1 ngày gộp thành 1 mục, comment / follow giữ riêng.
+  // Màn Activity: like cùng 1 bài (hoặc cùng 1 comment) trong cùng 1 ngày gộp thành 1 mục,
+  // các loại khác giữ riêng.
   // Sắp theo hành động mới nhất của mỗi mục; cursor = id của mục cuối trang
   async findAll(userId: number, q: NotificationQueryDto) {
     const groups = await this.prisma.$queryRaw<GroupRow[]>`
@@ -130,6 +159,8 @@ export class NotificationsService {
       GROUP BY CASE
         WHEN n.type = 'LIKE'
           THEN 'L:' || n."postId" || ':' || to_char(n."createdAt", 'YYYY-MM-DD')
+        WHEN n.type = 'COMMENT_LIKE'
+          THEN 'CL:' || n."commentId" || ':' || to_char(n."createdAt", 'YYYY-MM-DD')
         ELSE 'N:' || n.id
       END
       ${q.cursor ? Prisma.sql`HAVING max(n.id) < ${q.cursor}` : Prisma.empty}

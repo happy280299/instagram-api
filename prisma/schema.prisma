@@ -22,6 +22,9 @@ enum NotificationType {
   LIKE
   COMMENT
   FOLLOW
+  MENTION // được @nhắc tên trong caption / comment
+  REPLY // có người trả lời comment của mình
+  COMMENT_LIKE // có người thích comment của mình
 }
 
 model User {
@@ -57,6 +60,8 @@ model User {
   conversations ConversationMember[]
   messages      Message[]
   reelViews     ReelView[]
+  commentLikes  CommentLike[]
+  refreshTokens RefreshToken[]
 
   // Tìm user (GET /users/search): ILIKE '%...%' + similarity() dùng index trigram (pg_trgm)
   @@index([username(ops: raw("gin_trgm_ops"))], type: Gin, map: "User_username_trgm_idx")
@@ -111,6 +116,7 @@ model Post {
 
   notifications Notification[]
   reelViews     ReelView[]
+  hashtags      PostHashtag[]
 
   @@index([authorId, createdAt])
   // tab Reels + tab Reels trên profile
@@ -143,17 +149,23 @@ model Like {
 }
 
 model Comment {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   postId    Int
   authorId  Int
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  // Trả lời: chỉ 1 cấp (trả lời 1 câu trả lời thì vẫn gắn vào comment gốc, giống Instagram)
+  parentId  Int?
+  parent    Comment?  @relation("replies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("replies")
   content   String
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   notifications Notification[]
+  likes         CommentLike[]
 
   @@index([postId, createdAt])
+  @@index([parentId, createdAt])
 }
 
 model SavedPost {
@@ -296,4 +308,59 @@ model ReelView {
 
   @@id([userId, postId])
   @@index([postId])
+}
+
+// #hashtag trong caption, tách ra lúc tạo / sửa bài
+model Hashtag {
+  id        Int      @id @default(autoincrement())
+  // chữ thường, không có '#': 'đàlạt', 'saigon'
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  posts PostHashtag[]
+
+  // gợi ý khi gõ '#...'
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "Hashtag_name_trgm_idx")
+}
+
+model PostHashtag {
+  postId    Int
+  hashtagId Int
+  post      Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  hashtag   Hashtag @relation(fields: [hashtagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, hashtagId])
+  // trang hashtag: bài mới nhất trước
+  @@index([hashtagId, postId])
+}
+
+model CommentLike {
+  userId    Int
+  commentId Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, commentId])
+  @@index([commentId])
+}
+
+// Phiên đăng nhập. Chỉ lưu SHA-256 của refresh token (lộ DB cũng không dùng được token).
+// Mỗi lần refresh: thu hồi token cũ, cấp token mới cùng `family` (rotation).
+// Token đã thu hồi mà bị dùng lại -> nghi bị đánh cắp -> thu hồi cả family
+model RefreshToken {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  // 1 lần đăng nhập trên 1 thiết bị = 1 family
+  family    String
+  userAgent String?
+  createdAt DateTime  @default(now())
+  expiresAt DateTime
+  revokedAt DateTime?
+
+  @@index([userId])
+  @@index([family])
+  @@index([expiresAt])
 }

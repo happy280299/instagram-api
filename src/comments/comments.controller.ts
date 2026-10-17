@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   ParseIntPipe,
   Post,
@@ -17,6 +18,7 @@ import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { JwtPayload } from '../auth/jwt-payload';
 import { ResponseMessage } from '../common/response-message.decorator';
+import { RateLimit } from '../common/rate-limits';
 
 @Controller()
 export class CommentsController {
@@ -32,6 +34,7 @@ export class CommentsController {
     return this.comments.findAll(postId, query, user?.sub);
   }
 
+  @RateLimit.Comment
   @Post('posts/:postId/comments')
   @UseGuards(JwtAuthGuard)
   @ResponseMessage('Comment success')
@@ -51,5 +54,33 @@ export class CommentsController {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.comments.remove(id, user);
+  }
+
+  @Get('comments/:id/replies')
+  @UseGuards(OptionalJwtAuthGuard)
+  findReplies(
+    @Param('id', ParseIntPipe) id: number,
+    @Query() query: CommentQueryDto,
+    @CurrentUser() user: JwtPayload | undefined,
+  ) {
+    return this.comments.findReplies(id, query, user?.sub);
+  }
+
+  @Post('comments/:id/like')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
+  @ResponseMessage('Liked')
+  like(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: JwtPayload) {
+    return this.comments.like(id, user.sub);
+  }
+
+  @Delete('comments/:id/like')
+  @UseGuards(JwtAuthGuard)
+  @ResponseMessage('Unliked')
+  unlike(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.comments.unlike(id, user.sub);
   }
 }

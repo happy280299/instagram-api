@@ -280,11 +280,13 @@ export class StoriesService {
       where: { id: storyId },
     });
     // Xoá file không được làm hỏng request: lỗi thì ghi log, story vẫn coi như đã xoá
-    await this.deleteMediaIfUnused(mediaUrl).catch((err: Error) =>
-      this.logger.warn(
-        `Story ${storyId}: could not delete media: ${err.message}`,
-      ),
-    );
+    await this.uploads
+      .removeIfUnused(mediaUrl)
+      .catch((err: Error) =>
+        this.logger.warn(
+          `Story ${storyId}: could not delete media: ${err.message}`,
+        ),
+      );
     return null;
   }
 
@@ -312,7 +314,7 @@ export class StoriesService {
           await this.prisma.$transaction(
             async (tx) => {
               await tx.story.delete({ where: { id: story.id } });
-              await this.deleteMediaIfUnused(story.mediaUrl, tx);
+              await this.uploads.removeIfUnused(story.mediaUrl, tx);
               // có gọi Cloudinary bên trong -> nới timeout mặc định 5s của Prisma
             },
             { timeout: 15_000 },
@@ -331,22 +333,6 @@ export class StoriesService {
     } finally {
       this.purging = false;
     }
-  }
-
-  // Cùng 1 URL upload có thể đã được dùng cho post / avatar / story / tin nhắn khác -> còn dùng thì giữ file
-  private async deleteMediaIfUnused(
-    url: string,
-    db: Prisma.TransactionClient = this.prisma,
-  ) {
-    const [posts, avatars, stories, messages] = await Promise.all([
-      db.postMedia.count({ where: { url } }),
-      db.user.count({ where: { avatarUrl: url } }),
-      db.story.count({ where: { mediaUrl: url } }),
-      // ảnh / video đã gửi trong tin nhắn
-      db.message.count({ where: { mediaUrl: url } }),
-    ]);
-    if (posts + avatars + stories + messages === 0)
-      await this.uploads.remove(url);
   }
 
   private async trayAuthorIds(viewerId: number) {

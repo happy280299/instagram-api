@@ -13,14 +13,23 @@ import { UsersModule } from './users/users.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { ChatModule } from './chat/chat.module';
+import { HashtagsModule } from './hashtags/hashtags.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { AppThrottlerGuard } from './common/app-throttler.guard';
 import { join } from 'path';
 
 @Module({
   imports: [
     // cron job: dọn story hết hạn (StoriesService.purgeExpired)
     ScheduleModule.forRoot(),
+    // rate limit mặc định: 120 request / phút / user (hoặc IP nếu chưa đăng nhập)
+    ThrottlerModule.forRoot({
+      throttlers: [{ name: 'default', ttl: 60_000, limit: 120 }],
+      errorMessage: 'Too many requests, please try again later',
+    }),
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'public'),
       serveRoot: '/static',
@@ -37,8 +46,9 @@ import { join } from 'path';
     NotificationsModule,
     RealtimeModule,
     ChatModule,
+    HashtagsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: AppThrottlerGuard }],
 })
 export class AppModule {}

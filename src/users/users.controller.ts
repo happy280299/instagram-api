@@ -14,9 +14,11 @@ import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { JwtPayload } from '../auth/jwt-payload';
 import { ResponseMessage } from '../common/response-message.decorator';
+import { RateLimit } from '../common/rate-limits';
 import { UserPostsQueryDto } from '../posts/dto/user-posts-query.dto';
 import { FollowListQueryDto } from './dto/follow-list-query.dto';
 import { SearchUsersQueryDto } from './dto/search-users-query.dto';
+import { SuggestionsQueryDto } from './dto/suggestions-query.dto';
 
 // Profile công khai theo username (URL FE: /<username>), id số chỉ dùng nội bộ
 @Controller('users')
@@ -24,6 +26,7 @@ export class UsersController {
   constructor(private users: UsersService) {}
 
   // Phải khai báo trước ':username', không thì 'search' bị hiểu là username
+  @RateLimit.Search
   @Get('search')
   @UseGuards(OptionalJwtAuthGuard)
   search(
@@ -31,6 +34,16 @@ export class UsersController {
     @CurrentUser() user: JwtPayload | undefined,
   ) {
     return this.users.search(query, user?.sub);
+  }
+
+  // Phải khai báo trước ':username'
+  @Get('suggestions')
+  @UseGuards(OptionalJwtAuthGuard)
+  suggestions(
+    @Query() query: SuggestionsQueryDto,
+    @CurrentUser() user: JwtPayload | undefined,
+  ) {
+    return this.users.suggestions(query, user?.sub);
   }
 
   @Get(':username')
@@ -82,6 +95,7 @@ export class UsersController {
     return this.users.findFollowing(username, query, user?.sub);
   }
 
+  @RateLimit.Follow
   @Post(':username/follow')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)

@@ -4,11 +4,11 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { UploadsService } from '../uploads/uploads.service';
 import { PresenceService } from '../realtime/presence.service';
+import { TokensService } from './tokens.service';
 import { User } from '../generated/prisma/client';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -20,12 +20,12 @@ import { toSearchText } from '../common/search-text';
 export class AuthService {
   constructor(
     private prisma: PrismaService,
-    private jwt: JwtService,
     private uploads: UploadsService,
     private presence: PresenceService,
+    private tokens: TokensService,
   ) {}
 
-  async register(dto: RegisterDto) {
+  async register(dto: RegisterDto, userAgent?: string) {
     // 1. Email đã tồn tại chưa?
     const existing = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -58,10 +58,10 @@ export class AuthService {
     });
 
     // 5. Trả về token + user (không kèm password)
-    return this.buildAuthResponse(user);
+    return this.buildAuthResponse(user, userAgent);
   }
 
-  async login(dto: LoginDto) {
+  async login(dto: LoginDto, userAgent?: string) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
@@ -72,7 +72,7 @@ export class AuthService {
     if (!user || !ok)
       throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
 
-    return this.buildAuthResponse(user);
+    return this.buildAuthResponse(user, userAgent);
   }
 
   async me(userId: number) {
@@ -171,8 +171,9 @@ export class AuthService {
     return { ...safeUser, avatarUrl: toAvatarUrl(safeUser.avatarUrl) };
   }
 
-  private buildAuthResponse(user: User) {
-    const accessToken = this.jwt.sign({ sub: user.id, role: user.role });
-    return { accessToken, user: this.toSafeUser(user) };
+  // accessToken (ngắn hạn) + refreshToken (30 ngày, mở 1 phiên đăng nhập mới)
+  private async buildAuthResponse(user: User, userAgent?: string) {
+    const tokens = await this.tokens.issue(user, userAgent);
+    return { ...tokens, user: this.toSafeUser(user) };
   }
 }

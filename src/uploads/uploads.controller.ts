@@ -15,6 +15,7 @@ import { memoryStorage } from 'multer';
 import { catchError, throwError } from 'rxjs';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ResponseMessage } from '../common/response-message.decorator';
+import { RateLimit } from '../common/rate-limits';
 import { MAX_UPLOAD_BYTES, UploadsService } from './uploads.service';
 
 // Multer báo 'File too large' -> đổi sang message FE hiện được trong toast
@@ -41,6 +42,7 @@ class FileTooLargeMessage implements NestInterceptor {
 export class UploadsController {
   constructor(private uploads: UploadsService) {}
 
+  @RateLimit.Upload
   @Post()
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(

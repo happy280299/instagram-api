@@ -119,3 +119,23 @@ export type Message = Prisma.MessageModel
  * 
  */
 export type ReelView = Prisma.ReelViewModel
+/**
+ * Model Hashtag
+ * 
+ */
+export type Hashtag = Prisma.HashtagModel
+/**
+ * Model PostHashtag
+ * 
+ */
+export type PostHashtag = Prisma.PostHashtagModel
+/**
+ * Model CommentLike
+ * 
+ */
+export type CommentLike = Prisma.CommentLikeModel
+/**
+ * Model RefreshToken
+ * 
+ */
+export type RefreshToken = Prisma.RefreshTokenModel
